@@ -6,82 +6,18 @@ using namespace std;
 #include <raylib.h>
 
 #include "ball.h"
+#include "paddle.h"
 
 int PLAYER_SCORE = 0;
 int AI_SCORE = 0;
 
-class Paddle {
-    public:
-    Vector2 position;
-    Vector2 velocity = { 300.0f, 300.0f };
-    int w = 16; 
-    int h = 128;
-    bool rotated = false;
-    int autoOffset = 4;
-    int centerX = position.x + (w / 2);
-    int centerY = position.y + (h / 2);
-
-    Paddle(Vector2 position): position{position} {}
-    Paddle(Vector2 position, int w, int h): position{position}, w{w}, h{h} {}
-    Paddle(Vector2 position, int w, int h, bool rotated): position{position}, w{w}, h{h}, rotated{rotated} {}
-        
-    void Print() {
-		std::cout << "Paddle Pos: X: " << position.x << ", Y: " << position.y << "\n";
-		std::cout << "Paddle Vel: X: " << velocity.x << ", Y: " << velocity.y << "\n";
-    }
-
-    void Update() {
-        Draw();
-        CollisionBorder();
-    }
-
-    void Input() {
-        if ((IsKeyDown(KEY_W) || IsKeyDown(KEY_UP)) && position.y > 0) position.y -= velocity.y * GetFrameTime();
-        if ((IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) && position.y < GetScreenHeight() - h) position.y += velocity.y * GetFrameTime();
-    }
-
-    void Auto(Ball * ball) {
-        centerX = position.x + (w / 2);
-        centerY = position.y + (h / 2);
-
-        if(rotated) {
-            if (ball->position.x > centerX + autoOffset) position.x += velocity.x * GetFrameTime();
-            else if (ball->position.x <= centerX - autoOffset) position.x -= velocity.x * GetFrameTime();
-        } else {
-            if (ball->position.y > centerY + autoOffset) position.y += velocity.y * GetFrameTime();
-            else if (ball->position.y <= centerY - autoOffset) position.y -= velocity.y * GetFrameTime();
-        }
-    }
-
-    private:
-    void Draw() {
-        DrawRectangle(position.x, position.y, w, h, WHITE);
-    }
-
-    void CollisionBorder() {
-        if(rotated) {
-            if(position.x + w >= GetScreenWidth()) {
-                position.x = GetScreenWidth() - w;
-            } else if(position.x <= 0) {
-                position.x = 0;
-            }
-        } else {
-            if(position.y + h >= GetScreenHeight()) {
-                position.y = GetScreenHeight() - h;
-            } else if(position.y <= 0) {
-                position.y = 0;
-            }
-        }
-    }
-
-    Vector2 Vector2Add(Vector2 one, Vector2 two) {
-        return {one.x + two.x, one.y + two.y};
-    }
-
-    Vector2 Vector2Multiply(Vector2 one, Vector2 two) {
-        return {one.x * two.x, one.y * two.y};
-    }
-};
+const int INIT_SCREEN_W = 1280;
+const int INIT_SCREEN_H = 720;
+const int HALF_W = INIT_SCREEN_W / 2;
+const int QUART_W = INIT_SCREEN_W / 4;
+const int SXTNTH_H = INIT_SCREEN_H / 16;
+const int TEXT_OFFSET = 8;
+const int FONT_SIZE = 32;
 
 void UpdateRay() {
     ClearBackground(BLACK);
@@ -89,18 +25,12 @@ void UpdateRay() {
 }
 
 void UpdateBackground() {
-    int halfWidth = GetScreenWidth() / 2;
-    int quarterWidth = GetScreenWidth() / 4;
-    int sixteenthHeight = GetScreenHeight() / 16;
-    int offset = 8;
-    int fontSize = 32;
-
-    DrawLine(halfWidth, 0, halfWidth, GetScreenHeight(), WHITE);
-    DrawText(TextFormat("%i", AI_SCORE), quarterWidth - offset, sixteenthHeight, fontSize, WHITE);
-    DrawText(TextFormat("%i", PLAYER_SCORE), (GetScreenWidth() - quarterWidth) - offset, sixteenthHeight, fontSize, WHITE);
+    DrawLine(HALF_W, 0, HALF_W, GetScreenHeight(), WHITE);
+    DrawText(TextFormat("%i", AI_SCORE), QUART_W - TEXT_OFFSET, SXTNTH_H, FONT_SIZE, WHITE);
+    DrawText(TextFormat("%i", PLAYER_SCORE), (GetScreenWidth() - QUART_W) - TEXT_OFFSET, SXTNTH_H, FONT_SIZE, WHITE);
 }
 
-void CollisionCheck(Ball * ball, Paddle * paddle, bool rotated) {
+void CollisionBallPaddle(Ball * ball, Paddle * paddle, bool rotated) {
     if(CheckCollisionCircleRec(
         ball->position, 
         ball->radius, 
@@ -117,7 +47,7 @@ void CollisionCheck(Ball * ball, Paddle * paddle, bool rotated) {
     }
 }
 
-void CollisionBorder(Ball * ball) {
+void CollisionBallBorder(Ball * ball) {
     if(ball->position.x > GetScreenWidth()) {
         ball->Reset();
         AI_SCORE++;
@@ -137,11 +67,8 @@ void CollisionBorder(Ball * ball) {
 
 int main()
 {
-    int m_screen_w = 1280;
-    int m_screen_h = 720;
-
     // Initialize raylib
-    InitWindow(m_screen_w, m_screen_h, "Pong");
+    InitWindow(INIT_SCREEN_W, INIT_SCREEN_H, "Pong");
     SetWindowState(FLAG_VSYNC_HINT);
 
     // Initialize random seed
@@ -155,7 +82,7 @@ int main()
     Paddle topPaddle{ Vector2 {(float) GetScreenWidth() / 2 - 64, 32}, 128, 16, true};
     Paddle bottomPaddle{ Vector2 {(float) GetScreenWidth() / 2 - 64, (float) GetScreenHeight() - 32 - 16}, 128, 16, true};
 
-    // Pick a random direction to multiply velocity by
+    // Pick a random initial direction to multiply velocity by
     int randomX = rand() % 2 == 0 ? 1 : -1;
     int randomY = rand() % 2 == 0 ? 1 : -1;
     ball.setVelocity(4.0f, Vector2 { (float) randomX, (float) randomY });
@@ -169,12 +96,12 @@ int main()
         UpdateBackground();
 
         // Collision detection
-        if(ball.position.x < GetScreenWidth() / 2) CollisionCheck(&ball, &leftPaddle, false);
-        else CollisionCheck(&ball, &rightPaddle, false);
-        if(ball.position.y < GetScreenHeight() / 2) CollisionCheck(&ball, &topPaddle, true);
-        else CollisionCheck(&ball, &bottomPaddle, true);
+        if(ball.position.x < GetScreenWidth() / 2) CollisionBallPaddle(&ball, &leftPaddle, false);
+        else CollisionBallPaddle(&ball, &rightPaddle, false);
+        if(ball.position.y < GetScreenHeight() / 2) CollisionBallPaddle(&ball, &topPaddle, true);
+        else CollisionBallPaddle(&ball, &bottomPaddle, true);
 
-        CollisionBorder(&ball);
+        CollisionBallBorder(&ball);
 
         // Updates
         leftPaddle.Update();
