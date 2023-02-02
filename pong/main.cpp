@@ -1,77 +1,14 @@
-#include <raylib.h>
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
 using namespace std;
 
+#include <raylib.h>
+
+#include "ball.h"
+
 int PLAYER_SCORE = 0;
 int AI_SCORE = 0;
-
-class Ball {
-    public:
-    int radius;
-    Vector2 position = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-    Vector2 velocity = { 0.0f, 0.0f };
-
-    Ball(): radius{8} {}
-    Ball(int r): radius{r} {}
-
-    void Print() {
-		std::cout << "Ball Pos: X: " << position.x << ", Y: " << position.y << "\n";
-		std::cout << "Ball Vel: X: " << velocity.x << ", Y: " << velocity.y << "\n";
-    }
-
-    void setVelocity(float speed, Vector2 direction) { 
-        velocity = Vector2Multiply(Vector2 {speed, speed}, direction);
-    }
-
-    void Update() {
-        Draw();
-        CollisionBorder();
-
-        position = Vector2Add(position, velocity);
-    }
-
-    private:
-    void Draw() {
-        DrawCircle(position.x, position.y, radius, WHITE);
-    }
-
-    void Reset() {
-        position = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-        velocity = { 0.0f, 0.0f };
-
-        int randomX = rand() % 2 == 0 ? 1 : -1;
-        int randomY = rand() % 2 == 0 ? 1 : -1;
-        setVelocity(4.0f, Vector2 { (float) randomX, (float) randomY });
-    }
-
-    void CollisionBorder() {
-        if(position.x > GetScreenWidth()) {
-            Reset();
-            AI_SCORE++;
-        } else if(position.x < 0) {
-            Reset();
-            PLAYER_SCORE++;
-        }
-
-        if(position.y > GetScreenHeight()) {
-            position.y = GetScreenHeight();
-            velocity.y *= -1;
-        } else if(position.y < 0) {
-            position.y = 0;
-            velocity.y *= -1;
-        }
-    }
-
-    Vector2 Vector2Add(Vector2 one, Vector2 two) {
-        return {one.x + two.x, one.y + two.y};
-    }
-
-    Vector2 Vector2Multiply(Vector2 one, Vector2 two) {
-        return {one.x * two.x, one.y * two.y};
-    }
-};
 
 class Paddle {
     public:
@@ -152,7 +89,6 @@ void UpdateRay() {
 }
 
 void UpdateBackground() {
-
     int halfWidth = GetScreenWidth() / 2;
     int quarterWidth = GetScreenWidth() / 4;
     int sixteenthHeight = GetScreenHeight() / 16;
@@ -178,6 +114,24 @@ void CollisionCheck(Ball * ball, Paddle * paddle, bool rotated) {
                 else ball->position.x = paddle->position.x - ball->radius;
                 ball->velocity.x *= -1;
             }
+    }
+}
+
+void CollisionBorder(Ball * ball) {
+    if(ball->position.x > GetScreenWidth()) {
+        ball->Reset();
+        AI_SCORE++;
+    } else if(ball->position.x < 0) {
+        ball->Reset();
+        PLAYER_SCORE++;
+    }
+
+    if(ball->position.y > GetScreenHeight()) {
+        ball->position.y = GetScreenHeight();
+        ball->velocity.y *= -1;
+    } else if(ball->position.y < 0) {
+        ball->position.y = 0;
+        ball->velocity.y *= -1;
     }
 }
 
@@ -219,6 +173,8 @@ int main()
         else CollisionCheck(&ball, &rightPaddle, false);
         if(ball.position.y < GetScreenHeight() / 2) CollisionCheck(&ball, &topPaddle, true);
         else CollisionCheck(&ball, &bottomPaddle, true);
+
+        CollisionBorder(&ball);
 
         // Updates
         leftPaddle.Update();
