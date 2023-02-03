@@ -16,8 +16,10 @@ class Paddle {
     bool rotated = h < w;
     float autoOffset = 8.0f;
 
-    Paddle(Vector2 position): position{position} {}
+    Color color = WHITE;
+
     Paddle(Vector2 position, int w, int h): position{position}, w{w}, h{h} {}
+    Paddle(Vector2 position, int w, int h, Color color): position{position}, w{w}, h{h}, color{color} {}
         
     void Print() {
 		std::cout << "Paddle Pos: X: " << position.x << ", Y: " << position.y << "\n";

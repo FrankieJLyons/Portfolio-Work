@@ -55,6 +55,13 @@ void DrawScores() {
     DrawText(TextFormat("%i", BOTTOM_SCORE),  QUART_W - TEXT_OFFSET, INIT_SCREEN_H - SXTNTH_H, FONT_SIZE, YELLOW);
 }
 
+void DrawRectangles() {
+    DrawText(TextFormat("%i", LEFT_SCORE), QUART_W - TEXT_OFFSET, SXTNTH_H, FONT_SIZE, RED);
+    DrawText(TextFormat("%i", TOP_SCORE), (INIT_SCREEN_W - QUART_W) - TEXT_OFFSET, SXTNTH_H, FONT_SIZE, GREEN);
+    DrawText(TextFormat("%i", RIGHT_SCORE), (INIT_SCREEN_W - QUART_W) - TEXT_OFFSET, INIT_SCREEN_H - SXTNTH_H, FONT_SIZE, BLUE);
+    DrawText(TextFormat("%i", BOTTOM_SCORE),  QUART_W - TEXT_OFFSET, INIT_SCREEN_H - SXTNTH_H, FONT_SIZE, YELLOW);
+}
+
 // Ball and Paddle Specific
 float GetDistance(Ball * ball, Paddle * paddle) {
   Vector2 closest = vm.Clamp(ball->position, paddle->position, vm.Add(paddle->position, {(float) paddle->w, (float) paddle->h}));
