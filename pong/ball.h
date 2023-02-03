@@ -7,16 +7,19 @@ class Ball {
     private:
     VectorMath & vm = VectorMath::getInstance();
 
+    Vector2 initialPosition = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    float initialSpeed = 200.0f;
+
     void Draw() {
         DrawCircle(position.x, position.y, radius, WHITE);
     }
 
     public:
     float radius = 4;
-    Vector2 position = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    Vector2 position = initialPosition;
+    Vector2 direction = vm.GetRandomDirection();
+    float speed = initialSpeed;
 
-    Vector2 direction = { rand() % 2 == 0 ? 1.0f : -1.0f, rand() % 2 == 0 ? 1.0f : -1.0f };
-    float speed = 200.0f;
     Vector2 velocity = vm.Scale(direction, speed);
 
 
@@ -32,6 +35,7 @@ class Ball {
 
     void Update() {
         Draw();
+        Print();
         
         position.x += velocity.x * GetFrameTime();
         position.y += velocity.y * GetFrameTime();
@@ -40,10 +44,9 @@ class Ball {
     }
 
     void Reset() {
-        position = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-        velocity = { 0.0f, 0.0f };
-
-        direction = { rand() % 2 == 0 ? 1.0f : -1.0f, rand() % 2 == 0 ? 1.0f : -1.0f };
+        position = initialPosition;
+        direction = vm.GetRandomDirection();
+        speed = initialSpeed;
         velocity = vm.Scale(direction, speed);
     }
 };

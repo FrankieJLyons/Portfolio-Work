@@ -10,11 +10,10 @@ class Paddle {
     Vector2 center = {position.x + (w / 2), position.y + (h / 2)};
     Rectangle bounds = {position.x, position.y, (float) w, (float) h};
 
-    float speed = 300.0f;
+    float speed = 10.0f;
     Vector2 velocity = { speed, speed };
 
     bool rotated = h < w;
-    float autoOffset = 8.0f;
 
     Color color = WHITE;
 
@@ -43,17 +42,17 @@ class Paddle {
         center = {position.x + (w / 2), position.y + (h / 2)};
 
         if(rotated) {
-            if (ball->position.x > center.x + autoOffset) position.x += velocity.x * GetFrameTime();
-            else if (ball->position.x <= center.x - autoOffset) position.x -= velocity.x * GetFrameTime();
+            if (ball->position.x > center.x) position.x += velocity.x * GetFrameTime();
+            else if (ball->position.x <= center.x) position.x -= velocity.x * GetFrameTime();
         } else {
-            if (ball->position.y > center.y + autoOffset) position.y += velocity.y * GetFrameTime();
-            else if (ball->position.y <= center.y - autoOffset) position.y -= velocity.y * GetFrameTime();
+            if (ball->position.y > center.y) position.y += velocity.y * GetFrameTime();
+            else if (ball->position.y <= center.y) position.y -= velocity.y * GetFrameTime();
         }
     }
 
     private:
     void Draw() {
-        DrawRectangle(position.x, position.y, w, h, WHITE);
+        DrawRectangle(position.x, position.y, w, h, color);
     }
 
     void CollisionBorder() {
