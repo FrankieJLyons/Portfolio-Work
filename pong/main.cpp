@@ -78,13 +78,12 @@ void CollisionBallPaddle(Ball * ball, Paddle * paddle) {
             fmaxf(paddle->position.y, fminf(ball->position.y, paddle->position.y + paddle->h))
         };
         
+        Vector2 reflection = vm.Normalize(vm.Subtract(closest, ball->position));
         float incomingAngle = atan2(ball->position.y - paddle->center.y, ball->position.x - paddle->center.x);
+        float reflectionAngle = atan2(reflection.y, reflection.x);
+        float newDirection = reflectionAngle + (0.5 * (M_PI - (2 * fabs(reflectionAngle - incomingAngle))));
 
-        Vector2 surfaceNormal = vm.Normalize(vm.Subtract(closest, ball->position));
-        float surfaceNormalAngle = atan2(surfaceNormal.y, surfaceNormal.x);
-        float reflection = (2 * surfaceNormalAngle) - incomingAngle;
-
-        ball->direction = vm.Normalize({cos(reflection), sin(reflection)});
+        ball->direction = vm.Normalize({cos(newDirection), sin(newDirection)});
         ball->velocity = vm.Scale(ball->direction, ball->speed);
 
         ball->Print();
