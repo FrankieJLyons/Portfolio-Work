@@ -12,7 +12,7 @@ class Ball {
     }
 
     public:
-    float radius = 8;
+    float radius = 4;
     Vector2 position = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
 
     Vector2 direction = { rand() % 2 == 0 ? 1.0f : -1.0f, rand() % 2 == 0 ? 1.0f : -1.0f };

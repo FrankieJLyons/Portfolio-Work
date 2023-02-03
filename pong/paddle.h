@@ -14,7 +14,7 @@ class Paddle {
     Vector2 velocity = { speed, speed };
 
     bool rotated = h < w;
-    int autoOffset = 4;
+    float autoOffset = 8.0f;
 
     Paddle(Vector2 position): position{position} {}
     Paddle(Vector2 position, int w, int h): position{position}, w{w}, h{h} {}
@@ -56,15 +56,15 @@ class Paddle {
 
     void CollisionBorder() {
         if(rotated) {
-            if(position.x + w >= GetScreenWidth()) {
+            if(position.x + w + velocity.x * GetFrameTime() >= GetScreenWidth()) {
                 position.x = GetScreenWidth() - w;
-            } else if(position.x <= 0) {
+            } else if(position.x - velocity.x * GetFrameTime() <= 0) {
                 position.x = 0;
             }
         } else {
-            if(position.y + h >= GetScreenHeight()) {
+            if(position.y + h + velocity.y * GetFrameTime() >= GetScreenHeight()) {
                 position.y = GetScreenHeight() - h;
-            } else if(position.y <= 0) {
+            } else if(position.y - velocity.y * GetFrameTime() <= 0) {
                 position.y = 0;
             }
         }
