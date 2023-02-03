@@ -1,12 +1,15 @@
 #include <iostream>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 using namespace std;
 
 #include <raylib.h>
 
 #include "ball.h"
 #include "paddle.h"
+
+bool DRAW_FPS = true;
 
 int PLAYER_SCORE = 0;
 int AI_SCORE = 0;
@@ -19,9 +22,12 @@ const int SXTNTH_H = INIT_SCREEN_H / 16;
 const int TEXT_OFFSET = 8;
 const int FONT_SIZE = 32;
 
+VectorMath & vm = VectorMath::getInstance();
+
 void UpdateRay() {
     ClearBackground(BLACK);
-    DrawFPS(4, 4);
+    if(DRAW_FPS) DrawFPS(4, 4);
+    if(IsKeyPressed(KEY_F)) DRAW_FPS = !DRAW_FPS;
 }
 
 void UpdateBackground() {
@@ -30,20 +36,58 @@ void UpdateBackground() {
     DrawText(TextFormat("%i", PLAYER_SCORE), (GetScreenWidth() - QUART_W) - TEXT_OFFSET, SXTNTH_H, FONT_SIZE, WHITE);
 }
 
-void CollisionBallPaddle(Ball * ball, Paddle * paddle, bool rotated) {
+// Ball and Paddle Specific
+float GetDistance(Ball * ball, Paddle * paddle) {
+  Vector2 closest = vm.Clamp(ball->position, paddle->position, vm.Add(paddle->position, {(float) paddle->w, (float) paddle->h}));
+  Vector2 distance = vm.Subtract(ball->position, closest);
+  return vm.Length(distance) - ball->radius;
+}
+
+Vector2 GetMinimumTranslation(Ball * ball, Paddle * paddle) {
+    Vector2 mtd = {0, 0};
+
+    // Get the closest point on the rectangle to the center of the circle
+    Vector2 closest = vm.Clamp(ball->position, paddle->position, vm.Add(paddle->position, {(float) paddle->w, (float) paddle->h}));
+    
+    // Get the distance between the closest point and the center of the circle
+    Vector2 distance = vm.Subtract(ball->position, closest);
+    
+    // If the distance is less than the radius of the circle, there is overlap
+    float d = vm.Length(distance);
+    if (d < ball->radius) {
+        // Calculate the MTD by normalizing the distance and scaling it by the distance minus the radius of the circle
+        mtd = vm.Scale(vm.Normalize(distance), ball->radius - d);
+    }
+
+    return mtd;
+}
+
+void CollisionBallPaddle(Ball * ball, Paddle * paddle) {
     if(CheckCollisionCircleRec(
         ball->position, 
         ball->radius, 
-        Rectangle {(float) paddle->position.x, (float) paddle->position.y, (float) paddle->w, (float) paddle->h})) {
-            if(rotated) {
-                if(ball->velocity.y < 0) ball->position.y = paddle->position.y + paddle->h + ball->radius + 1;
-                else ball->position.y = paddle->position.y - ball->radius;
-                ball->velocity.y *= -1;
-            } else {
-                if(ball->velocity.x < 0) ball->position.x = paddle->position.x + paddle->w + ball->radius + 1;
-                else ball->position.x = paddle->position.x - ball->radius;
-                ball->velocity.x *= -1;
-            }
+        paddle->bounds)) {
+
+        ball->Print();
+
+        Vector2 mtd = GetMinimumTranslation(ball, paddle);
+        ball->position = vm.Add(ball->position, mtd);
+        
+        Vector2 closest = {
+            fmaxf(paddle->position.x, fminf(ball->position.x, paddle->position.x + paddle->w)),
+            fmaxf(paddle->position.y, fminf(ball->position.y, paddle->position.y + paddle->h))
+        };
+        
+        float incomingAngle = atan2(ball->position.y - paddle->center.y, ball->position.x - paddle->center.x);
+
+        Vector2 surfaceNormal = vm.Normalize(vm.Subtract(closest, ball->position));
+        float surfaceNormalAngle = atan2(surfaceNormal.y, surfaceNormal.x);
+        float reflection = (2 * surfaceNormalAngle) - incomingAngle;
+
+        ball->direction = vm.Normalize({cos(reflection), sin(reflection)});
+        ball->velocity = vm.Scale(ball->direction, ball->speed);
+
+        ball->Print();
     }
 }
 
@@ -56,13 +100,11 @@ void CollisionBallBorder(Ball * ball) {
         PLAYER_SCORE++;
     }
 
-    if(ball->position.y > GetScreenHeight()) {
-        ball->position.y = GetScreenHeight();
-        ball->velocity.y *= -1;
-    } else if(ball->position.y < 0) {
-        ball->position.y = 0;
-        ball->velocity.y *= -1;
+    if (ball->position.y - ball->radius < 0 || ball->position.y + ball->radius >= GetScreenHeight()) {
+        ball->direction.y = -ball->direction.y;
     }
+
+    ball->velocity = vm.Scale(ball->direction, ball->speed);
 }
 
 int main()
@@ -79,13 +121,8 @@ int main()
     Paddle leftPaddle{ Vector2 { 32,  (float) GetScreenHeight() / 2 - 64} };
     Paddle rightPaddle{ Vector2 { (float) GetScreenWidth() - 32 - 16,  (float) GetScreenHeight() / 2 - 64} };
 
-    Paddle topPaddle{ Vector2 {(float) GetScreenWidth() / 2 - 64, 32}, 128, 16, true};
-    Paddle bottomPaddle{ Vector2 {(float) GetScreenWidth() / 2 - 64, (float) GetScreenHeight() - 32 - 16}, 128, 16, true};
-
-    // Pick a random initial direction to multiply velocity by
-    int randomX = rand() % 2 == 0 ? 1 : -1;
-    int randomY = rand() % 2 == 0 ? 1 : -1;
-    ball.setVelocity(4.0f, Vector2 { (float) randomX, (float) randomY });
+    // Paddle topPaddle{ Vector2 {(float) GetScreenWidth() / 2 - 64, 32}, 128, 16};
+    // Paddle bottomPaddle{ Vector2 {(float) GetScreenWidth() / 2 - 64, (float) GetScreenHeight() - 32 - 16}, 128, 16};
 
     // Main game loop
     while (!WindowShouldClose())
@@ -96,27 +133,31 @@ int main()
         UpdateBackground();
 
         // Collision detection
-        if(ball.position.x < GetScreenWidth() / 2) CollisionBallPaddle(&ball, &leftPaddle, false);
-        else CollisionBallPaddle(&ball, &rightPaddle, false);
-        if(ball.position.y < GetScreenHeight() / 2) CollisionBallPaddle(&ball, &topPaddle, true);
-        else CollisionBallPaddle(&ball, &bottomPaddle, true);
+        CollisionBallPaddle(&ball, &leftPaddle);
+        CollisionBallPaddle(&ball, &rightPaddle);
+        // CollisionBallPaddle(&ball, &topPaddle);
+        // CollisionBallPaddle(&ball, &bottomPaddle);
 
         CollisionBallBorder(&ball);
 
         // Updates
         leftPaddle.Update();
         rightPaddle.Update();
-        topPaddle.Update();
-        bottomPaddle.Update();
+        // topPaddle.Update();
+        // bottomPaddle.Update();
         ball.Update();
 
         // AI Movement
         leftPaddle.Auto(&ball);
-        topPaddle.Auto(&ball);
-        bottomPaddle.Auto(&ball);
+        // topPaddle.Auto(&ball);
+        // bottomPaddle.Auto(&ball);
 
         // Player
         rightPaddle.Input();
+
+
+
+        DrawLine(ball.position.x, ball.position.y, leftPaddle.center.x, leftPaddle.center.y, RED);
 
         EndDrawing();
     }
