@@ -88,8 +88,6 @@ void CollisionBallBounce(Ball * ball, Rectangle rect) {
         rect)) {
 
         Vector2 mtd = vm.GetMinimumTranslation(ball->position, ball->radius, rect);
-        ball->position = vm.Add(ball->position, vm.Scale(mtd, 1.25f));
-
         Vector2 randDirection = { rand() % 2 == 0 ? 0.9f : 1.1f, rand() % 2 == 0 ? 0.9f : 1.1f };
 
         // Left side
@@ -104,6 +102,7 @@ void CollisionBallBounce(Ball * ball, Rectangle rect) {
 
         ball->speed *= 1.1f;
         ball->velocity = vm.Scale(ball->direction, ball->speed);
+        ball->position = vm.Add(ball->position, vm.Scale(mtd, 3.0f));
     }
 }
 
