@@ -112,19 +112,21 @@ void CollisionBallBorder(Ball * ball) {
     ball->position, 
     ball->radius, 
     Rectangle {PLAYGROUND_X, 0, INIT_SCREEN_H, INIT_SCREEN_H})) {     
-        if (ball->position.y < 0) {
+        int buffer = ball->radius * ball->radius;
+
+        if (ball->position.y < 0 - buffer) {
             Vector2 mtd = vm.GetMinimumTranslation(ball->position, ball->radius, {ball->position.x, 0, PLAYGROUND_W, 1});
             ball->position = vm.Add(ball->position, mtd);
             TOP_SCORE--;
-        } else if (ball->position.y > INIT_SCREEN_H){
+        } else if (ball->position.y > INIT_SCREEN_H + buffer){
             Vector2 mtd = vm.GetMinimumTranslation(ball->position, ball->radius, {ball->position.x, INIT_SCREEN_H, PLAYGROUND_W, 1});
             ball->position = vm.Add(ball->position, mtd);
             BOTTOM_SCORE--;
-        } else if (ball->position.x < PLAYGROUND_X) {
+        } else if (ball->position.x < PLAYGROUND_X - buffer) {
             Vector2 mtd = vm.GetMinimumTranslation(ball->position, ball->radius, {ball->position.x, 0, PLAYGROUND_W, 1});
             ball->position = vm.Add(ball->position, mtd);
             LEFT_SCORE--;
-        } else if (ball->position.x > PLAYGROUND_W){
+        } else if (ball->position.x > PLAYGROUND_W + buffer){
             Vector2 mtd = vm.GetMinimumTranslation(ball->position, ball->radius, {ball->position.x, INIT_SCREEN_H, PLAYGROUND_W, 1});
             ball->position = vm.Add(ball->position, mtd);
             RIGHT_SCORE--;
