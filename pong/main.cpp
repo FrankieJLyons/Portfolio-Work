@@ -28,8 +28,9 @@ const int QUART_H = INIT_SCREEN_H / 4;
 const int SXTNTH_W = INIT_SCREEN_W / 16;
 const int SXTNTH_H = INIT_SCREEN_H / 16;
 
-const int TEXT_OFFSET = 8;
 const int FONT_SIZE = 32;
+const int TEXT_OFFSET = FONT_SIZE / 2;
+const int TEXT_POS = TEXT_OFFSET * 3;
 
 const int PLAYGROUND_X = HALF_W - HALF_H;
 const int PLAYGROUND_W = HALF_W + HALF_H; 
@@ -49,17 +50,10 @@ void DrawPlayground() {
 }
 
 void DrawScores() {
-    DrawText(TextFormat("%i", LEFT_SCORE), QUART_W - TEXT_OFFSET, SXTNTH_H, FONT_SIZE, RED);
-    DrawText(TextFormat("%i", TOP_SCORE), (INIT_SCREEN_W - QUART_W) - TEXT_OFFSET, SXTNTH_H, FONT_SIZE, GREEN);
-    DrawText(TextFormat("%i", RIGHT_SCORE), (INIT_SCREEN_W - QUART_W) - TEXT_OFFSET, INIT_SCREEN_H - SXTNTH_H, FONT_SIZE, BLUE);
-    DrawText(TextFormat("%i", BOTTOM_SCORE),  QUART_W - TEXT_OFFSET, INIT_SCREEN_H - SXTNTH_H, FONT_SIZE, YELLOW);
-}
-
-void DrawRectangles() {
-    DrawText(TextFormat("%i", LEFT_SCORE), QUART_W - TEXT_OFFSET, SXTNTH_H, FONT_SIZE, RED);
-    DrawText(TextFormat("%i", TOP_SCORE), (INIT_SCREEN_W - QUART_W) - TEXT_OFFSET, SXTNTH_H, FONT_SIZE, GREEN);
-    DrawText(TextFormat("%i", RIGHT_SCORE), (INIT_SCREEN_W - QUART_W) - TEXT_OFFSET, INIT_SCREEN_H - SXTNTH_H, FONT_SIZE, BLUE);
-    DrawText(TextFormat("%i", BOTTOM_SCORE),  QUART_W - TEXT_OFFSET, INIT_SCREEN_H - SXTNTH_H, FONT_SIZE, YELLOW);
+    DrawText(TextFormat("%i", LEFT_SCORE), PLAYGROUND_X + TEXT_OFFSET, TEXT_OFFSET, FONT_SIZE, RED);
+    DrawText(TextFormat("%i", TOP_SCORE), PLAYGROUND_W - TEXT_POS, TEXT_OFFSET, FONT_SIZE, GREEN);
+    DrawText(TextFormat("%i", RIGHT_SCORE), PLAYGROUND_W - TEXT_POS, INIT_SCREEN_H - TEXT_POS, FONT_SIZE, BLUE);
+    DrawText(TextFormat("%i", BOTTOM_SCORE),   PLAYGROUND_X + TEXT_OFFSET, INIT_SCREEN_H - TEXT_POS, FONT_SIZE, YELLOW);
 }
 
 void CollisionBallPaddle(Ball * ball, Paddle * paddle) {
@@ -93,24 +87,22 @@ void CollisionBallBounce(Ball * ball, Rectangle rect) {
         ball->radius, 
         rect)) {
 
-
         Vector2 mtd = vm.GetMinimumTranslation(ball->position, ball->radius, rect);
-        ball->position = vm.Add(ball->position, mtd);
+        ball->position = vm.Add(ball->position, vm.Scale(mtd, 1.25f));
 
-        Vector2 randDirection = { rand() % 2 == 0 ? 0.95f : 1.05f, rand() % 2 == 0 ? 0.95f : 1.05f };
+        Vector2 randDirection = { rand() % 2 == 0 ? 0.9f : 1.1f, rand() % 2 == 0 ? 0.9f : 1.1f };
 
         // Left side
-        if(ball->position.x < rect.x) ball->direction.x = -ball->direction.x * randDirection.x;
+        if(ball->position.x <= rect.x) ball->direction.x = -ball->direction.x * randDirection.x;
         // Top Side
-        if(ball->position.y < rect.y) ball->direction.y = -ball->direction.y * randDirection.y;
+        if(ball->position.y <= rect.y) ball->direction.y = -ball->direction.y * randDirection.y;
 
         // Right side
-        if(ball->position.x > rect.x + rect.width) ball->direction.x = -ball->direction.x * randDirection.x;
-
+        if(ball->position.x >= rect.x + rect.width) ball->direction.x = -ball->direction.x * randDirection.x;
         // Bottom side
-        if(ball->position.y > rect.y + rect.height) ball->direction.y = -ball->direction.y * randDirection.y;
+        if(ball->position.y >= rect.y + rect.height) ball->direction.y = -ball->direction.y * randDirection.y;
 
-        ball->speed *= 1.05f;
+        ball->speed *= 1.1f;
         ball->velocity = vm.Scale(ball->direction, ball->speed);
     }
 }
@@ -176,7 +168,6 @@ int main()
         BeginDrawing();
         UpdateRay();
         DrawPlayground();
-        DrawScores();
 
         // Spawner Rectangles
         DrawRectangleRec(topLeft, WHITE);
@@ -209,10 +200,10 @@ int main()
         bottomPaddle.Update();
 
         // AI Movement
-        leftPaddle.Auto(&ball);
-        topPaddle.Auto(&ball);
-        bottomPaddle.Auto(&ball);
-        rightPaddle.Auto(&ball);
+        leftPaddle.Auto(&ball, topLeft, bottomLeft);
+        topPaddle.Auto(&ball, topLeft, topRight);
+        bottomPaddle.Auto(&ball, bottomLeft, bottomRight);
+        rightPaddle.Auto(&ball, topRight, bottomRight);
         // // Player Movement
         // rightPaddle.Input();
 
@@ -225,6 +216,7 @@ int main()
             DrawLine(ball.position.x, ball.position.y, bottomPaddle.center.x, bottomPaddle.center.y, YELLOW);
         }
 
+        DrawScores();
         EndDrawing();
     }
 

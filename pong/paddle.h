@@ -2,6 +2,13 @@
 #include <iostream>
 
 class Paddle {
+    private:
+    VectorMath & vm = VectorMath::getInstance();
+
+    void Draw() {
+        DrawRectangleRec(bounds, color);
+    }
+
     public:
     Vector2 position;
     int w = 16; 
@@ -10,12 +17,13 @@ class Paddle {
     Vector2 center = {position.x + (w / 2), position.y + (h / 2)};
     Rectangle bounds = {position.x, position.y, (float) w, (float) h};
 
-    float speed = 10.0f;
-    Vector2 velocity = { speed, speed };
+    float speed = 200.0f;
+    Vector2 direction = {0.0f, 0.0f};
+    Vector2 velocity = vm.Scale(direction, speed);
 
     bool rotated = h < w;
-
     Color color = WHITE;
+    float approachSpeed = 0.125f;
 
     Paddle(Vector2 position, int w, int h): position{position}, w{w}, h{h} {}
     Paddle(Vector2 position, int w, int h, Color color): position{position}, w{w}, h{h}, color{color} {}
@@ -27,10 +35,14 @@ class Paddle {
 
     void Update() {
         Draw();
-        CollisionBorder();
         
         center = {position.x + (w / 2), position.y + (h / 2)};
         bounds = {position.x, position.y, (float) w, (float) h};
+
+        position.x += velocity.x * GetFrameTime();
+        position.y += velocity.y * GetFrameTime();
+
+        velocity = vm.Scale(direction, speed);
     }
 
     void Input() {
@@ -38,35 +50,40 @@ class Paddle {
         if ((IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) && position.y < GetScreenHeight() - h) position.y += velocity.y * GetFrameTime();
     }
 
-    void Auto(Ball * ball) {
-        center = {position.x + (w / 2), position.y + (h / 2)};
-
+    void Auto(Ball * ball, Rectangle rec1, Rectangle rec2) {
         if(rotated) {
-            if (ball->position.x > center.x) position.x += velocity.x * GetFrameTime();
-            else if (ball->position.x <= center.x) position.x -= velocity.x * GetFrameTime();
-        } else {
-            if (ball->position.y > center.y) position.y += velocity.y * GetFrameTime();
-            else if (ball->position.y <= center.y) position.y -= velocity.y * GetFrameTime();
-        }
-    }
+            if(ball->position.x >= bounds.x && ball->position.x <= bounds.x + bounds.width) {
+                direction.x += (vm.roundToFirstDecimalPlace(ball->direction.x) - direction.x) * approachSpeed;
+            }
+            else if (ball->position.x <= bounds.x) {
+                direction.x += (-1.0f - direction.x) * approachSpeed;
+            }
+            else if (ball->position.x >= bounds.x + bounds.width) {
+                direction.x += (1.0f - direction.x) * approachSpeed;
+            }
 
-    private:
-    void Draw() {
-        DrawRectangle(position.x, position.y, w, h, color);
-    }
-
-    void CollisionBorder() {
-        if(rotated) {
-            if(position.x + w + velocity.x * GetFrameTime() >= GetScreenWidth()) {
-                position.x = GetScreenWidth() - w;
-            } else if(position.x - velocity.x * GetFrameTime() <= 0) {
-                position.x = 0;
+            float newX = position.x + velocity.x * GetFrameTime();
+            if(newX + w >= rec2.x) {
+                position.x = rec2.x - w;
+            } else if(newX <= rec1.x + rec1.width) {
+                position.x = rec1.x + rec1.width;
             }
         } else {
-            if(position.y + h + velocity.y * GetFrameTime() >= GetScreenHeight()) {
-                position.y = GetScreenHeight() - h;
-            } else if(position.y - velocity.y * GetFrameTime() <= 0) {
-                position.y = 0;
+            if(ball->position.y >= bounds.y && ball->position.y <= bounds.y + bounds.height) {    
+                direction.y += (vm.roundToFirstDecimalPlace(ball->direction.y) - direction.y) * approachSpeed;
+            }
+            else if (ball->position.y <= bounds.y) {   
+                direction.y += (-1.0f - direction.y) * approachSpeed;
+            }
+            else if (ball->position.y >= bounds.y + bounds.height) {
+                direction.y += (1.0f - direction.y) * approachSpeed;
+            }
+
+            float newY = position.y + velocity.y * GetFrameTime();
+            if(newY + h >= rec2.y) {
+                position.y = rec2.y - h;
+            } else if(newY <= rec1.y + rec1.height) {
+                position.y = rec1.y + rec1.height;
             }
         }
     }
