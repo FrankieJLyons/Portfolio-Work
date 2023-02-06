@@ -17,7 +17,7 @@ class Paddle {
     Vector2 center = {position.x + (w / 2), position.y + (h / 2)};
     Rectangle bounds = {position.x, position.y, (float) w, (float) h};
 
-    float speed = 200.0f;
+    float speed = 300.0f;
     Vector2 direction = {0.0f, 0.0f};
     Vector2 velocity = vm.Scale(direction, speed);
 
@@ -51,9 +51,10 @@ class Paddle {
     }
 
     void Auto(Ball * ball, Rectangle rec1, Rectangle rec2) {
+        float buffer = ball->radius * 2;
         if(rotated) {
-            if(ball->position.x >= bounds.x && ball->position.x <= bounds.x + bounds.width) {
-                direction.x += (vm.roundToFirstDecimalPlace(ball->direction.x) - direction.x) * approachSpeed;
+            if(ball->position.x >= bounds.x + buffer && ball->position.x <= bounds.x + bounds.width - buffer) {
+                direction.x += (ball->direction.x - direction.x) * approachSpeed;
             }
             else if (ball->position.x <= bounds.x) {
                 direction.x += (-1.0f - direction.x) * approachSpeed;
@@ -69,8 +70,8 @@ class Paddle {
                 position.x = rec1.x + rec1.width;
             }
         } else {
-            if(ball->position.y >= bounds.y && ball->position.y <= bounds.y + bounds.height) {    
-                direction.y += (vm.roundToFirstDecimalPlace(ball->direction.y) - direction.y) * approachSpeed;
+            if(ball->position.y >= bounds.y + buffer && ball->position.y <= bounds.y + bounds.height - buffer) {    
+                direction.y += (ball->direction.y - direction.y) * approachSpeed;
             }
             else if (ball->position.y <= bounds.y) {   
                 direction.y += (-1.0f - direction.y) * approachSpeed;
