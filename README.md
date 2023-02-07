@@ -12,12 +12,10 @@ alias com_ray="g++ main.cpp -I/opt/homebrew/Cellar/raylib/4.2.0/include -L/opt/h
 
 Known Issues:
 
-- If the paddle is close to the spawners, it jitters
-- Paddle velocity may skip or jump
+- None right now
 
 To Add:
 
-- Convert detections to within ranges
 - More balls
 - Paddle follow logic for multiple balls
 - Deflector mechanic?

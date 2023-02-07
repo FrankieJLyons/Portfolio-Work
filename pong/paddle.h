@@ -22,7 +22,7 @@ class Paddle {
 
     bool rotated = h < w;
     Color color = WHITE;
-    float approachSpeed = 0.125f;
+    float approachSpeed = 0.1f;
 
     Paddle(Vector2 position, int w, int h): position{position}, w{w}, h{h} {}
     Paddle(Vector2 position, int w, int h, Color color): position{position}, w{w}, h{h}, color{color} {}
@@ -51,38 +51,42 @@ class Paddle {
     void Auto(Ball * ball, Rectangle rec1, Rectangle rec2) {
         float buffer = ball->radius * 2;
         if(rotated) {
-            if(ball->position.x >= bounds.x + buffer && ball->position.x <= bounds.x + bounds.width - buffer) {
+            float newX = position.x + velocity.x * GetFrameTime();
+            if(newX + w >= rec2.x || position.x + w >= rec2.x) {
+                position.x = rec2.x - w;
+                direction.x = 0;
+            } else if(newX <= rec1.x + rec1.width || position.x <= rec1.x + rec1.width) {
+                position.x = rec1.x + rec1.width;
+                direction.x = 0;
+            }
+
+            if(vm.isWithinRange(ball->position.x, center.x, (bounds.width / 2))){
                 direction.x += (ball->direction.x - direction.x) * approachSpeed;
             }
-            else if (ball->position.x <= bounds.x) {
-                direction.x += (-1.0f - direction.x) * approachSpeed;
+            else if (ball->position.x < bounds.x) {
+                direction.x += (-1.0f - direction.x) * (approachSpeed / 2);
             }
-            else if (ball->position.x >= bounds.x + bounds.width) {
-                direction.x += (1.0f - direction.x) * approachSpeed;
-            }
-
-            float newX = position.x + velocity.x * GetFrameTime();
-            if(newX + w >= rec2.x) {
-                position.x = rec2.x - w;
-            } else if(newX <= rec1.x + rec1.width) {
-                position.x = rec1.x + rec1.width;
+            else if (ball->position.x > bounds.x + bounds.width) {
+                direction.x += (1.0f - direction.x) * (approachSpeed / 2);
             }
         } else {
-            if(ball->position.y >= bounds.y + buffer && ball->position.y <= bounds.y + bounds.height - buffer) {    
-                direction.y += (ball->direction.y - direction.y) * approachSpeed;
-            }
-            else if (ball->position.y <= bounds.y) {   
-                direction.y += (-1.0f - direction.y) * approachSpeed;
-            }
-            else if (ball->position.y >= bounds.y + bounds.height) {
-                direction.y += (1.0f - direction.y) * approachSpeed;
+            float newY = position.y + velocity.y * GetFrameTime();
+            if(newY + h >= rec2.y || position.y + h >= rec2.y) {
+                position.y = rec2.y - h;
+                direction.y = 0;
+            } else if(newY <= rec1.y + rec1.height || position.y <= rec1.y + rec1.height) {
+                position.y = rec1.y + rec1.height;
+                direction.y = 0;
             }
 
-            float newY = position.y + velocity.y * GetFrameTime();
-            if(newY + h >= rec2.y) {
-                position.y = rec2.y - h;
-            } else if(newY <= rec1.y + rec1.height) {
-                position.y = rec1.y + rec1.height;
+            if(vm.isWithinRange(ball->position.y, center.y, (bounds.height / 2))){
+                direction.y += (ball->direction.y - direction.y) * approachSpeed;
+            }
+            else if (ball->position.y < bounds.y) {   
+                direction.y += (-1.0f - direction.y) * (approachSpeed / 2);
+            }
+            else if (ball->position.y > bounds.y + bounds.height) {
+                direction.y += (1.0f - direction.y) * (approachSpeed / 2);
             }
         }
     }

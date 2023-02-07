@@ -22,7 +22,7 @@ class Ball {
     float speed = initialSpeed;
     Vector2 velocity = vm.Scale(direction, speed);
 
-    const float maxSpeed = speed * 2;
+    const float maxSpeed = initialSpeed * 2;
 
     Ball() {}
     Ball(float r): radius{r} {}
