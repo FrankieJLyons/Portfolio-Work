@@ -48,7 +48,18 @@ class Paddle {
         if ((IsKeyDown(KEY_S) || IsKeyDown(KEY_DOWN)) && position.y < GetScreenHeight() - h) position.y += velocity.y * GetFrameTime();
     }
 
-    void Auto(Ball * ball, Rectangle rec1, Rectangle rec2) {
+    void Auto(Ball * balls[], Rectangle rec1, Rectangle rec2) {
+
+        Ball ball;
+        float shortestDistance = 1000.0f;
+        for (int i = 0; i < balls->length; i++) {
+            float d = vm.Length(Subtract(ball[i]->position, center));
+            if(d <= shortestDistance) {
+                shortestDistance = d;
+                ball = ball[i];
+            }
+        }
+
         float buffer = ball->radius * 2;
         if(rotated) {
             float newX = position.x + velocity.x * GetFrameTime();

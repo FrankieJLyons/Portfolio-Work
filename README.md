@@ -19,3 +19,11 @@ To Add:
 - More balls
 - Paddle follow logic for multiple balls
 - Deflector mechanic?
+- Convert maths to rmath where possible
+- Make a game.h / game.cpp
+- Convert .h files into proper .h / .cpp files
+- Add a pause state
+- Add sounds
+- Add some graphics for scoring
+- add a win / lose state
+- If a paddle is out, make their goal a wall

@@ -255,7 +255,7 @@ int main()
     srand((unsigned int)time(NULL));
 
     // Initialize entities
-    Ball ball;
+    Ball balls[2];
 
     int longSide = 96;
     int shortSide = 12;
@@ -285,29 +285,30 @@ int main()
         DrawRectangleRec(bottomLeft, WHITE);
         DrawRectangleRec(bottomRight, WHITE);
 
-        // Collision detection
-        if(ball.position.x < HALF_W) CollisionBallPaddle(&ball, leftPaddle);
-        else CollisionBallPaddle(&ball, rightPaddle);
-        if(ball.position.y < HALF_H) CollisionBallPaddle(&ball, topPaddle);
-        else CollisionBallPaddle(&ball, bottomPaddle);
-
-        if(ball.position.x < HALF_W) {
-            if(ball.position.y < HALF_H) CollisionBallBounce(&ball, topLeft);
-            else CollisionBallBounce(&ball, bottomLeft);
-        }
-        else {
-            if(ball.position.y < HALF_H) CollisionBallBounce(&ball, topRight);
-            else CollisionBallBounce(&ball, bottomRight);
-        }
-
-        CollisionBallBorder(&ball);
-
-        // Updates
-        ball.Update();
         leftPaddle.Update();
         rightPaddle.Update();
         topPaddle.Update();
         bottomPaddle.Update();
+
+        // BALLS
+        for (int i = 0; i < balls.length; i++) {
+            ball[i].Update();
+            // Collision detection
+            if(ball[i].position.x < HALF_W) CollisionBallPaddle(&ball[i], leftPaddle);
+            else CollisionBallPaddle(&ball[i], rightPaddle);
+            if(ball[i].position.y < HALF_H) CollisionBallPaddle(&ball[i], topPaddle);
+            else CollisionBallPaddle(&ball[i], bottomPaddle);
+
+            if(ball[i].position.x < HALF_W) {
+                if(ball[i].position.y < HALF_H) CollisionBallBounce(&ball[i], topLeft);
+                else CollisionBallBounce(&ball[i], bottomLeft);
+            }
+            else {
+                if(ball[i].position.y < HALF_H) CollisionBallBounce(&ball[i], topRight);
+                else CollisionBallBounce(&ball[i], bottomRight);
+            }
+            CollisionBallBorder(&ball[i]);
+        }
 
         // AI Movement
         leftPaddle.Auto(&ball, topLeft, bottomLeft);
