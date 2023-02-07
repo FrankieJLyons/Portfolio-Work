@@ -53,7 +53,7 @@ void DrawScores() {
     DrawText(TextFormat("%i", LEFT_SCORE), PLAYGROUND_X + TEXT_OFFSET, TEXT_OFFSET, FONT_SIZE, RED);
     DrawText(TextFormat("%i", TOP_SCORE), PLAYGROUND_W - TEXT_POS, TEXT_OFFSET, FONT_SIZE, GREEN);
     DrawText(TextFormat("%i", RIGHT_SCORE), PLAYGROUND_W - TEXT_POS, INIT_SCREEN_H - TEXT_POS, FONT_SIZE, BLUE);
-    DrawText(TextFormat("%i", BOTTOM_SCORE),   PLAYGROUND_X + TEXT_OFFSET, INIT_SCREEN_H - TEXT_POS, FONT_SIZE, YELLOW);
+    DrawText(TextFormat("%i", BOTTOM_SCORE), PLAYGROUND_X + TEXT_OFFSET, INIT_SCREEN_H - TEXT_POS, FONT_SIZE, YELLOW);
 }
 
 void CollisionBallPaddle(Ball * ball, Paddle paddle) {
@@ -64,23 +64,147 @@ void CollisionBallPaddle(Ball * ball, Paddle paddle) {
     if(CheckCollisionCircleRec(
         ball->position, 
         ball->radius, 
-        rect) && elapsedTime > 0.1) {  
+        rect) && elapsedTime > 0.1) {
 
         lastCollisionTime = currentTime;
         Vector2 next = {paddle.position.x + paddle.velocity.x * GetFrameTime(), paddle.position.y + paddle.velocity.y * GetFrameTime()};
         Vector2 mtd = vm.GetMinimumMovingTranslation(ball->position, ball->radius, rect, next);
 
-        // Left or right side
-        if (ball->position.x < rect.x || ball->position.x > rect.x + rect.width) 
-            ball->direction.x *= -1;
-        // Top or bottom side
-        if (ball->position.y < rect.y || ball->position.y > rect.y + rect.height) 
-            ball->direction.y *= -1;
+        // Going Up and Left
+        if(ball->velocity.y < 0 && ball->velocity.x < 0) {
+            // Bottom Right
+            if (vm.isWithinRange(ball->position.y, rect.y + rect.height, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x + rect.width, ball->radius)) {
+                // Back the way it came
+                ball->direction.x *= -1;
+                ball->direction.y *= -1;
+            }
+            // Top Right
+            else if (vm.isWithinRange(ball->position.y, rect.y, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x + rect.width, ball->radius)) {
+                // Reflect X
+                ball->direction.x *= -1;
+            }
+            // Bottom Left
+            else if (vm.isWithinRange(ball->position.y, rect.y + rect.height, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x, ball->radius)) {
+                // Reflect Y
+                ball->direction.y *= -1;
+            } 
+            // Right 
+            else if (vm.isWithinRange(ball->position.x, rect.x + rect.width, ball->radius)) {
+                // Reflect X
+                ball->direction.x *= -1;
+            } 
+            // Bottom 
+            else if (vm.isWithinRange(ball->position.y, rect.y + rect.height, ball->radius)) {
+                // Reflect Y
+                ball->direction.y *= -1;
+            }
+        }
 
-        // if(ball->speed < ball->maxSpeed) ball->speed *= 1.05f;
+        // Going Up and Right
+        else if(ball->velocity.y < 0 && ball->velocity.x > 0) {
+            // Bottom Left
+            if (vm.isWithinRange(ball->position.y, rect.y + rect.height, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x, ball->radius)) {
+                // Back the way it came
+                ball->direction.x *= -1;
+                ball->direction.y *= -1;
+            } 
+            // Top Left
+            else if (vm.isWithinRange(ball->position.y, rect.y, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x, ball->radius)) {
+                // Reflect X
+                ball->direction.x *= -1;
+            }
+            // Bottom Right
+            else if (vm.isWithinRange(ball->position.y, rect.y + rect.height, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x + rect.width, ball->radius)) {
+                // Reflect Y
+                ball->direction.y *= -1;
+            }
+            // Left 
+            else if (vm.isWithinRange(ball->position.x, rect.x , ball->radius)) {
+                // Reflect X
+                ball->direction.x *= -1;
+            } 
+            // Bottom 
+            else if (vm.isWithinRange(ball->position.y, rect.y + rect.height, ball->radius)) {
+                // Reflect Y
+                ball->direction.y *= -1;
+            }
+        }
+
+        // Going Down and Right 
+        else if(ball->velocity.y > 0 && ball->velocity.x > 0) {
+            // Top Left
+            if (vm.isWithinRange(ball->position.y, rect.y, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x, ball->radius)) {
+                // Back the way it came
+                ball->direction.x *= -1;
+                ball->direction.y *= -1;
+            }
+            // Top Right
+            else if (vm.isWithinRange(ball->position.y, rect.y, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x + rect.width, ball->radius)) {
+                // Reflect Y
+                ball->direction.y *= -1;
+            }
+            // Bottom Left
+            else if (vm.isWithinRange(ball->position.y, rect.y + rect.height, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x, ball->radius)) {
+                // Reflect X
+                ball->direction.x *= -1;
+            } 
+            // Left 
+            else if (vm.isWithinRange(ball->position.x, rect.x, ball->radius)) {
+                // Reflect X
+                ball->direction.x *= -1;
+            } 
+            // Top 
+            else if (vm.isWithinRange(ball->position.y, rect.y, ball->radius)) {
+                // Reflect Y
+                ball->direction.y *= -1;
+            }
+        }
+
+        // Going Down and Left
+        else if(ball->velocity.y > 0 && ball->velocity.x < 0) {
+            // Top Right
+            if (vm.isWithinRange(ball->position.y, rect.y, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x + rect.width, ball->radius)) {
+                // Back the way it came
+                ball->direction.x *= -1;
+                ball->direction.y *= -1;
+            }
+            // Top Left
+            else if (vm.isWithinRange(ball->position.y, rect.y, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x, ball->radius)) {
+                // Reflect Y
+                ball->direction.y *= -1;
+            }
+            // Bottom Right
+            else if (vm.isWithinRange(ball->position.y, rect.y + rect.height, ball->radius) 
+            && vm.isWithinRange(ball->position.x, rect.x + rect.width, ball->radius)) {
+                // Reflect X
+                ball->direction.x *= -1;
+            }
+            // Right 
+            else if (vm.isWithinRange(ball->position.x, rect.x + rect.width, ball->radius)) {
+                // Reflect X
+                ball->direction.x *= -1;
+            } 
+            // Top 
+            else if (vm.isWithinRange(ball->position.y, rect.y, ball->radius)) {
+                // Reflect Y
+                ball->direction.y *= -1;
+            }
+        }
+
+        if(ball->speed < ball->maxSpeed) ball->speed *= 1.05f;
         ball->velocity = vm.Scale(ball->direction, ball->speed);
-        // ball->position = vm.Add(ball->position, vm.Scale(mtd, 1.025f));
-        ball->position = vm.Add(ball->position, vm.Scale(mtd, 1.0f));
+        ball->position = vm.Add(ball->position, vm.Scale(mtd, 1.025f));
 
         ball->Print();
     }
@@ -146,13 +270,13 @@ int main()
     int shortSide = 12;
     float square = 64.0f;
 
-    Paddle leftPaddle{ Vector2 {(float) PLAYGROUND_X, (float)  HALF_H - longSide / 2}, shortSide, longSide, RED };
+    Paddle leftPaddle{ Vector2 {(float) PLAYGROUND_X, (float) HALF_H - longSide / 2}, shortSide, longSide, RED };
     Paddle topPaddle{ Vector2 {(float) HALF_W - longSide / 2, 0}, longSide, shortSide, GREEN};
     Paddle rightPaddle{ Vector2 { (float) PLAYGROUND_W - shortSide, (float) HALF_H - longSide / 2}, shortSide, longSide, BLUE };
     Paddle bottomPaddle{ Vector2 {(float) HALF_W - longSide / 2, (float) INIT_SCREEN_H - shortSide}, longSide, shortSide, YELLOW};
 
     Rectangle topLeft{ (float) PLAYGROUND_X, 0, square, square };
-    Rectangle topRight{  (float) PLAYGROUND_W - square, 0, square, square };
+    Rectangle topRight{ (float) PLAYGROUND_W - square, 0, square, square };
     Rectangle bottomLeft{ (float) PLAYGROUND_X, INIT_SCREEN_H - square, square, square};
     Rectangle bottomRight{ (float) PLAYGROUND_W - square, INIT_SCREEN_H - square, square, square};
 
@@ -194,11 +318,11 @@ int main()
         topPaddle.Update();
         bottomPaddle.Update();
 
-        // // AI Movement
-        // leftPaddle.Auto(&ball, topLeft, bottomLeft);
-        // topPaddle.Auto(&ball, topLeft, topRight);
-        // bottomPaddle.Auto(&ball, bottomLeft, bottomRight);
-        // rightPaddle.Auto(&ball, topRight, bottomRight);
+        // AI Movement
+        leftPaddle.Auto(&ball, topLeft, bottomLeft);
+        topPaddle.Auto(&ball, topLeft, topRight);
+        bottomPaddle.Auto(&ball, bottomLeft, bottomRight);
+        rightPaddle.Auto(&ball, topRight, bottomRight);
         // // Player Movement
         // rightPaddle.Input();
 

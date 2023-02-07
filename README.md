@@ -12,11 +12,12 @@ alias com_ray="g++ main.cpp -I/opt/homebrew/Cellar/raylib/4.2.0/include -L/opt/h
 
 Known Issues:
 
-- If the ball speed is too great it will pass through a paddle
-- If the ball deflects from a paddle corner it may go the wrong direction
+- If the paddle is close to the spawners, it jitters
+- Paddle velocity may skip or jump
 
 To Add:
 
+- Convert detections to within ranges
 - More balls
-  -- Paddle follow logic
+- Paddle follow logic for multiple balls
 - Deflector mechanic?

@@ -13,9 +13,8 @@ class Paddle {
     Vector2 position;
     int w = 16; 
     int h = 128;
-
-    Vector2 center = {position.x + (w / 2), position.y + (h / 2)};
     Rectangle bounds = {position.x, position.y, (float) w, (float) h};
+    Vector2 center = {position.x + (w / 2), position.y + (h / 2)};
 
     float speed = 300.0f;
     Vector2 direction = {0.0f, 0.0f};
@@ -35,14 +34,13 @@ class Paddle {
 
     void Update() {
         Draw();
-        
-        center = {position.x + (w / 2), position.y + (h / 2)};
-        bounds = {position.x, position.y, (float) w, (float) h};
 
         position.x += velocity.x * GetFrameTime();
         position.y += velocity.y * GetFrameTime();
-
         velocity = vm.Scale(direction, speed);
+
+        bounds = {position.x, position.y, (float) w, (float) h};
+        center = {position.x + (w / 2), position.y + (h / 2)};
     }
 
     void Input() {
