@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <vector>
 using namespace std;
 
 #include <raylib.h>
@@ -255,14 +256,18 @@ int main()
     srand((unsigned int)time(NULL));
 
     // Initialize entities
-    Ball balls[2];
+    Ball ball1;
+    Ball ball2;
+    Ball ball3;
+
+    vector<Ball> balls = {ball1, ball2, ball3};
 
     int longSide = 96;
     int shortSide = 12;
     float square = 64.0f;
 
-    Paddle leftPaddle{ Vector2 {(float) PLAYGROUND_X, (float) HALF_H - longSide / 2}, shortSide, longSide, RED };
     Paddle topPaddle{ Vector2 {(float) HALF_W - longSide / 2, 0}, longSide, shortSide, GREEN};
+    Paddle leftPaddle{ Vector2 {(float) PLAYGROUND_X, (float) HALF_H - longSide / 2}, shortSide, longSide, RED };
     Paddle rightPaddle{ Vector2 { (float) PLAYGROUND_W - shortSide, (float) HALF_H - longSide / 2}, shortSide, longSide, BLUE };
     Paddle bottomPaddle{ Vector2 {(float) HALF_W - longSide / 2, (float) INIT_SCREEN_H - shortSide}, longSide, shortSide, GOLD};
 
@@ -291,42 +296,44 @@ int main()
         bottomPaddle.Update();
 
         // BALLS
-        for (int i = 0; i < balls.length; i++) {
-            ball[i].Update();
+        for (Ball & ball : balls) {
+            ball.Update();
             // Collision detection
-            if(ball[i].position.x < HALF_W) CollisionBallPaddle(&ball[i], leftPaddle);
-            else CollisionBallPaddle(&ball[i], rightPaddle);
-            if(ball[i].position.y < HALF_H) CollisionBallPaddle(&ball[i], topPaddle);
-            else CollisionBallPaddle(&ball[i], bottomPaddle);
+            if(ball.position.x < HALF_W) CollisionBallPaddle(&ball, leftPaddle);
+            else CollisionBallPaddle(&ball, rightPaddle);
+            if(ball.position.y < HALF_H) CollisionBallPaddle(&ball, topPaddle);
+            else CollisionBallPaddle(&ball, bottomPaddle);
 
-            if(ball[i].position.x < HALF_W) {
-                if(ball[i].position.y < HALF_H) CollisionBallBounce(&ball[i], topLeft);
-                else CollisionBallBounce(&ball[i], bottomLeft);
+            if(ball.position.x < HALF_W) {
+                if(ball.position.y < HALF_H) CollisionBallBounce(&ball, topLeft);
+                else CollisionBallBounce(&ball, bottomLeft);
             }
             else {
-                if(ball[i].position.y < HALF_H) CollisionBallBounce(&ball[i], topRight);
-                else CollisionBallBounce(&ball[i], bottomRight);
+                if(ball.position.y < HALF_H) CollisionBallBounce(&ball, topRight);
+                else CollisionBallBounce(&ball, bottomRight);
             }
-            CollisionBallBorder(&ball[i]);
+            CollisionBallBorder(&ball);
         }
 
         // AI Movement
-        leftPaddle.Auto(&ball, topLeft, bottomLeft);
-        topPaddle.Auto(&ball, topLeft, topRight);
-        bottomPaddle.Auto(&ball, bottomLeft, bottomRight);
-        rightPaddle.Auto(&ball, topRight, bottomRight);
+        leftPaddle.Auto(balls, topLeft, bottomLeft);
+        topPaddle.Auto(balls, topLeft, topRight);
+        bottomPaddle.Auto(balls, bottomLeft, bottomRight);
+        rightPaddle.Auto(balls, topRight, bottomRight);
         // // Player Movement
         // rightPaddle.Input();
 
         // Debug Drawings
         if(DRAW_DEBUG){
-            DrawText(TextFormat("X: %i", (int) ball.position.x), 8, 32, 16, WHITE);
-            DrawText(TextFormat("Y: %i", (int) ball.position.y), 8, 48, 16, WHITE);
-            DrawText(TextFormat("S: %i", (int) ball.speed), 8, 64, 16, WHITE);
-            DrawLine(ball.position.x, ball.position.y, leftPaddle.center.x, leftPaddle.center.y, RED);
-            DrawLine(ball.position.x, ball.position.y, topPaddle.center.x, topPaddle.center.y, GREEN);
-            DrawLine(ball.position.x, ball.position.y, rightPaddle.center.x, rightPaddle.center.y, BLUE);
-            DrawLine(ball.position.x, ball.position.y, bottomPaddle.center.x, bottomPaddle.center.y, GOLD);
+            for (Ball & ball : balls) {
+                DrawText(TextFormat("X: %i", (int) ball.position.x), 8, 32, 16, WHITE);
+                DrawText(TextFormat("Y: %i", (int) ball.position.y), 8, 48, 16, WHITE);
+                DrawText(TextFormat("S: %i", (int) ball.speed), 8, 64, 16, WHITE);
+                DrawLine(ball.position.x, ball.position.y, leftPaddle.center.x, leftPaddle.center.y, RED);
+                DrawLine(ball.position.x, ball.position.y, topPaddle.center.x, topPaddle.center.y, GREEN);
+                DrawLine(ball.position.x, ball.position.y, rightPaddle.center.x, rightPaddle.center.y, BLUE);
+                DrawLine(ball.position.x, ball.position.y, bottomPaddle.center.x, bottomPaddle.center.y, GOLD);
+            }
         }
 
         DrawScores();
