@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <vector>
+#include <forward_list>
 using namespace std;
 
 #include <raylib.h>
@@ -227,7 +227,7 @@ void CollisionBallBounce(Ball * ball, Rectangle rect) {
     }
 }
 
-void CollisionBallBorder(Ball * ball) {
+void CollisionBallBorder(forward_list<Ball>* balls, Ball * ball) {
     int buffer = ball->radius * 4.0f;
     if(!CheckCollisionCircleRec(
     ball->position, 
@@ -242,7 +242,16 @@ void CollisionBallBorder(Ball * ball) {
         } else if (ball->position.x > PLAYGROUND_W){
             RIGHT_SCORE--;
         }
-        ball->Reset();
+
+        // Delete ball
+        auto it = balls->before_begin();
+        auto end = balls->end();
+        for (auto nextIt = balls->begin(); nextIt != end; it = nextIt, ++nextIt) {
+            if (&(*nextIt) == ball) {
+                balls->erase_after(it);
+                break;
+            }
+        }
     }
 }
 
@@ -256,11 +265,7 @@ int main()
     srand((unsigned int)time(NULL));
 
     // Initialize entities
-    Ball ball1;
-    Ball ball2;
-    Ball ball3;
-
-    vector<Ball> balls = {ball1, ball2, ball3};
+    forward_list<Ball> balls = { Ball() };
 
     int longSide = 96;
     int shortSide = 12;
@@ -275,6 +280,10 @@ int main()
     Rectangle topRight{ (float) PLAYGROUND_W - square, 0, square, square };
     Rectangle bottomLeft{ (float) PLAYGROUND_X, INIT_SCREEN_H - square, square, square};
     Rectangle bottomRight{ (float) PLAYGROUND_W - square, INIT_SCREEN_H - square, square, square};
+
+    // Set up timer to add new balls
+    float addBallInterval = 5.0f; // time in seconds
+    float timeSinceLastBall = 0.0f;
 
     // Main game loop
     while (!WindowShouldClose())
@@ -295,6 +304,13 @@ int main()
         topPaddle.Update();
         bottomPaddle.Update();
 
+        // Add a new ball every `addBallInterval` seconds
+        timeSinceLastBall += GetFrameTime();
+        if (timeSinceLastBall >= addBallInterval) {
+            timeSinceLastBall = 0.0f;
+            balls.push_front(Ball());
+        }
+
         // BALLS
         for (Ball & ball : balls) {
             ball.Update();
@@ -312,7 +328,7 @@ int main()
                 if(ball.position.y < HALF_H) CollisionBallBounce(&ball, topRight);
                 else CollisionBallBounce(&ball, bottomRight);
             }
-            CollisionBallBorder(&ball);
+            CollisionBallBorder(&balls, &ball);
         }
 
         // AI Movement
