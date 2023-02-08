@@ -282,7 +282,7 @@ int main()
     Rectangle bottomRight{ (float) PLAYGROUND_W - square, INIT_SCREEN_H - square, square, square};
 
     // Set up timer to add new balls
-    float addBallInterval = 5.0f; // time in seconds
+    float addBallInterval = 3.0f; // time in seconds
     float timeSinceLastBall = 0.0f;
 
     // Main game loop

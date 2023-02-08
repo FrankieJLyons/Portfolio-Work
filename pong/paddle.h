@@ -49,18 +49,7 @@ class Paddle {
     }
 
     void Auto(forward_list<Ball>& balls, Rectangle rec1, Rectangle rec2) {
-
-        Ball * ball;
-        float shortestDistance = 1000.0f;
-        for (Ball & b : balls) {
-            float d = vm.Length(vm.Subtract(position, b.position));
-            if(d < shortestDistance){
-                ball = &b;
-                shortestDistance = d;
-            }
-        }
-
-        float buffer = ball->radius * 2;
+        // Border Logic
         if(rotated) {
             float newX = position.x + velocity.x * GetFrameTime();
             if(newX + w >= rec2.x || position.x + w >= rec2.x) {
@@ -69,16 +58,6 @@ class Paddle {
             } else if(newX <= rec1.x + rec1.width || position.x <= rec1.x + rec1.width) {
                 position.x = rec1.x + rec1.width;
                 direction.x = 0;
-            }
-
-            if(vm.isWithinRange(ball->position.x, center.x, (bounds.width / 2))){
-                direction.x += (ball->direction.x - direction.x) * approachSpeed;
-            }
-            else if (ball->position.x < bounds.x) {
-                direction.x += (-1.0f - direction.x) * (approachSpeed / 2);
-            }
-            else if (ball->position.x > bounds.x + bounds.width) {
-                direction.x += (1.0f - direction.x) * (approachSpeed / 2);
             }
         } else {
             float newY = position.y + velocity.y * GetFrameTime();
@@ -89,15 +68,79 @@ class Paddle {
                 position.y = rec1.y + rec1.height;
                 direction.y = 0;
             }
+        }
 
-            if(vm.isWithinRange(ball->position.y, center.y, (bounds.height / 2))){
-                direction.y += (ball->direction.y - direction.y) * approachSpeed;
+        // Center logic
+        if(balls.empty()) {         
+            Vector2 restPosition = {(float) GetScreenWidth() / 2 - w / 2, (float) GetScreenHeight() / 2 - h / 2};  
+            direction = {0, 0};
+            if(rotated && !vm.isWithinRange(position.x, restPosition.x, 0)){
+                position.x += (restPosition.x - position.x) * (approachSpeed / 10);
+            } else if(!rotated && !vm.isWithinRange(position.y, restPosition.y, 0)){
+                position.y += (restPosition.y - position.y) * (approachSpeed / 10);
             }
-            else if (ball->position.y < bounds.y) {   
-                direction.y += (-1.0f - direction.y) * (approachSpeed / 2);
+        } else { // Follow logic
+            Ball * ball;
+
+            float shortestDistance = 1000.0f;
+            bool ballFound = false;
+            for (Ball & b : balls) {
+                float d = vm.Length(vm.Subtract(position, b.position));
+
+                bool dangerousDirection = false;
+                if (rotated) {
+                    if (position.y < GetScreenHeight() / 2) { // Top
+                        dangerousDirection = b.direction.y < 0; // Up
+                    } else {
+                        dangerousDirection = b.direction.y > 0; // Down
+                    }
+                } else {
+                    if (position.x < GetScreenWidth() / 2) { // Left
+                        dangerousDirection = b.direction.x < 0; // Left
+                    } else {
+                        dangerousDirection = b.direction.x > 0; // Right
+                    }
+                }
+
+                if(d < shortestDistance && dangerousDirection) {
+                    ball = &b;
+                    shortestDistance = d;
+                    ballFound = true;
+                }
             }
-            else if (ball->position.y > bounds.y + bounds.height) {
-                direction.y += (1.0f - direction.y) * (approachSpeed / 2);
+
+            if (!ballFound) {
+                for (Ball & b : balls) {
+                    float d = vm.Length(vm.Subtract(position, b.position));
+                    if (d < shortestDistance) {
+                        ball = &b;
+                        shortestDistance = d;
+                    }
+                }
+            }
+
+            float buffer = ball->radius * 2;
+            
+            if(rotated) {
+                if(vm.isWithinRange(ball->position.x, center.x, (bounds.width / 2))){
+                    direction.x += (ball->direction.x - direction.x) * approachSpeed;
+                }
+                else if (ball->position.x < bounds.x) {
+                    direction.x += (-1.0f - direction.x) * (approachSpeed / 2);
+                }
+                else if (ball->position.x > bounds.x + bounds.width) {
+                    direction.x += (1.0f - direction.x) * (approachSpeed / 2);
+                }
+            } else {
+                if(vm.isWithinRange(ball->position.y, center.y, (bounds.height / 2))){
+                    direction.y += (ball->direction.y - direction.y) * approachSpeed;
+                }
+                else if (ball->position.y < bounds.y) {   
+                    direction.y += (-1.0f - direction.y) * (approachSpeed / 2);
+                }
+                else if (ball->position.y > bounds.y + bounds.height) {
+                    direction.y += (1.0f - direction.y) * (approachSpeed / 2);
+                }
             }
         }
     }

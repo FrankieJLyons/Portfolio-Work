@@ -12,13 +12,10 @@ alias com_ray="g++ main.cpp -I/opt/homebrew/Cellar/raylib/4.2.0/include -L/opt/h
 
 Known Issues:
 
-- None right now
+- Very randomly, a ball may slowly ignore a paddle?
 
 To Add:
 
-- More balls
-- Paddle follow logic for multiple balls
-- Deflector mechanic?
 - Convert maths to rmath where possible
 - Make a game.h / game.cpp
 - Convert .h files into proper .h / .cpp files
@@ -27,3 +24,4 @@ To Add:
 - Add some graphics for scoring
 - add a win / lose state
 - If a paddle is out, make their goal a wall
+- Deflector mechanic?
