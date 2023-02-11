@@ -8,17 +8,16 @@ alias com_sf="g++ main.cpp -I/opt/homebrew/Cellar/sfml/2.5.1_2/include -L/opt/ho
 
 alias com_ray="g++ main.cpp -I/opt/homebrew/Cellar/raylib/4.2.0/include -L/opt/homebrew/Cellar/raylib/4.2.0/lib -lraylib -std=c++11 -arch arm64 -o app && ./app"
 
-// Pong
+// Pong Compile command
+
+alias com_pong="g++ main.cpp ball.cpp collisions.cpp game.cpp paddle.cpp -I/opt/homebrew/Cellar/raylib/4.2.0/include -L/opt/homebrew/Cellar/raylib/4.2.0/lib -lraylib -std=c++11 -arch arm64 -o app && ./app"
 
 Known Issues:
 
-- Very randomly, a ball may slowly ignore a paddle?
+- Very randomly, a ball may ignore a paddle?
 
 To Add:
 
-- Convert maths to rmath where possible
-- Make a game.h / game.cpp
-- Convert .h files into proper .h / .cpp files
 - Add a pause state
 - Add sounds
 - Add some graphics for scoring

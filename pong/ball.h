@@ -1,51 +1,45 @@
-#include <raylib.h>
+#ifndef BALL_H
+#define BALL_H
+
+#pragma once
+
 #include <iostream>
 
+#include <raylib.h>
+
+#include "consts.h"
 #include "vectorMath.h"
 
 class Ball {
-    private:
-    VectorMath & vm = VectorMath::getInstance();
-
-    Vector2 initialPosition = { GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
-    float initialSpeed = 300.0f;
-
-    void Draw() {
-        DrawCircle(position.x, position.y, radius, WHITE);
-    }
-
-    public:
-    float radius = 8;
-    Vector2 position = initialPosition;
+public:
+    int id;
+    Vector2 position;
+    float radius;
+    Vector2 direction;
+    float speed;
+    Vector2 velocity;
     
-    Vector2 direction = vm.GetRandomDirection();
-    float speed = initialSpeed;
-    Vector2 velocity = vm.Scale(direction, speed);
-
+    const float initialSpeed = 300.0f;
     const float maxSpeed = initialSpeed * 2;
 
-    Ball() {}
-    Ball(float r): radius{r} {}
+    Ball();
+    void Print();
+    void Draw();
+    void Update();
 
-    void Print() {
-		std::cout << "\rBall Pos: X: " << position.x << ", Y: " << position.y << "\n";
-		std::cout << "\rBall Vel: X: " << velocity.x << ", Y: " << velocity.y << "\n";
-		std::cout << "\rBall Dir: X: " << direction.x << ", Y: " << direction.y << "\n";
-		std::cout << "\rBall speed: " << speed << "\n";
+    Ball& operator=(const Ball &other) {
+        return *this;
     }
 
-    void Update() {
-        Draw();
-        
-        position.x += velocity.x * GetFrameTime();
-        position.y += velocity.y * GetFrameTime();
-        velocity = vm.Scale(direction, speed);
+    bool operator==(const Ball &other) const {
+        return id == other.id;
     }
 
-    void Reset() {
-        position = initialPosition;
-        direction = vm.GetRandomDirection();
-        speed = initialSpeed;
-        velocity = vm.Scale(direction, speed);
-    }
+private:
+    VectorMath & vm = VectorMath::getInstance();
+    const Vector2 initialPosition = { HALF_W, HALF_H };
+
+    static int nextId;
 };
+
+#endif
