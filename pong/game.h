@@ -30,13 +30,16 @@ private:
     float timeSinceLastBall = 0.0f;
 
     bool debuging = true;
-    float debugBallOffset = 32.0f;
+    bool paused = false;
+
+    Sound soundPause = LoadSound("/Users/frankie/Developer/Portfolio-Work/pong/assets/Pause.ogg");
 
     void DrawPlayground();
     void DrawBalls();
     void DrawPaddles();
     void DrawScores();
     void DrawSquares();
+    void DrawPaused();
     void DrawDebug();
 
     void AddBall();

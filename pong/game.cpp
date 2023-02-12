@@ -38,14 +38,17 @@ void Game::Draw()
     DrawBalls();
     DrawPaddles();
     DrawScores();
+    DrawPaused();
     DrawDebug();
 }
 
 void Game::Update()
 {
-    AddBall();
-    UpdateBall();
-    UpdatePaddle();
+    if(!paused){ 
+        AddBall();
+        UpdateBall();
+        UpdatePaddle();
+    }
 }
 
 /////////////
@@ -82,6 +85,17 @@ void Game::DrawSquares() {
     DrawRectangleRec(squares["BOTTOM_LEFT"], WHITE);
     DrawRectangleRec(squares["TOP_RIGHT"], WHITE);
     DrawRectangleRec(squares["BOTTOM_RIGHT"], WHITE);
+}
+
+void Game::DrawPaused() {
+    if(IsKeyPressed(KEY_P)) { 
+        paused = !paused; 
+        PlaySound(soundPause);
+    }
+    if(paused) {
+        DrawRectangle(0, 0, SCREEN_W, SCREEN_H, Fade(BLACK, 0.5f));
+        DrawText("PAUSED", HALF_W - MeasureText("PAUSED", 40)/2, HALF_H - 20, 40, WHITE);
+    }
 }
 
 void Game::DrawDebug() {

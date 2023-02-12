@@ -18,8 +18,6 @@ Known Issues:
 
 To Add:
 
-- Add a pause state
-- Add sounds
 - Add some graphics for scoring
 - add a win / lose state
 - If a paddle is out, make their goal a wall

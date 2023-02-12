@@ -11,8 +11,9 @@ int main()
     // Initialize random seed
     srand((unsigned int)time(NULL));
 
-    Game game = Game();
+    InitAudioDevice();
 
+    Game game = Game();
     game.Setup();
 
     // Main game loop
@@ -26,6 +27,8 @@ int main()
 
         EndDrawing();
     }
+
+    CloseAudioDevice(); 
 
     // Close the window and unload all resources
     CloseWindow();

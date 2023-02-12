@@ -156,6 +156,7 @@ void Collisions::BallPaddle(Ball * ball, Paddle paddle) {
         Vector2 mtd = vm.GetMinimumMovingTranslation(ball->position, ball->radius, rect, next);
         BounceBallOffRectangle(ball, rect);
         ResolveBallRectCollision(ball, mtd);
+        PlaySound(soundPaddle); 
     }
 }
 
@@ -167,6 +168,7 @@ void Collisions::BallRect(Ball * ball, Rectangle rect) {
         Vector2 mtd = vm.GetMinimumTranslation(ball->position, ball->radius, rect);
         BounceBallOffRectangle(ball, rect);
         ResolveBallRectCollision(ball, mtd);
+        PlaySound(soundSquare);
     }
 }
 
@@ -176,6 +178,7 @@ bool Collisions::BallBorder(Ball * ball) {
     ball->position, 
     buffer, 
     Rectangle {PLAYGROUND_X, 0, SCREEN_H, SCREEN_H})) {  
+        PlaySound(soundScore);
         return true;
     }
     return false;
