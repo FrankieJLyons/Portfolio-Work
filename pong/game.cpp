@@ -38,6 +38,7 @@ void Game::Draw()
     DrawBalls();
     DrawPaddles();
     DrawScores();
+    DrawParticles();
     DrawPaused();
     DrawDebug();
 }
@@ -48,6 +49,7 @@ void Game::Update()
         AddBall();
         UpdateBall();
         UpdatePaddle();
+        UpdateParticles();
     }
 }
 
@@ -85,6 +87,14 @@ void Game::DrawSquares() {
     DrawRectangleRec(squares["BOTTOM_LEFT"], WHITE);
     DrawRectangleRec(squares["TOP_RIGHT"], WHITE);
     DrawRectangleRec(squares["BOTTOM_RIGHT"], WHITE);
+}
+
+void Game::DrawParticles()
+{
+    for (int i = 0; i < MAX_PARTICLES; i++)
+    {
+        particles[i].Draw();
+    }
 }
 
 void Game::DrawPaused() {
@@ -178,4 +188,12 @@ void Game::UpdatePaddle() {
     
     // // Player Movement
     // rightPaddle.Input();
+}
+
+void Game::UpdateParticles()
+{
+    for (int i = 0; i < MAX_PARTICLES; i++)
+    {
+        particles[i].Update();
+    }
 }

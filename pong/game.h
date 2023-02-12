@@ -15,6 +15,7 @@ using namespace std;
 #include "collisions.h"
 #include "consts.h"
 #include "paddle.h"
+#include "particle.h"
 
 class Game
 {
@@ -39,18 +40,21 @@ private:
     void DrawPaddles();
     void DrawScores();
     void DrawSquares();
+    void DrawParticles();
     void DrawPaused();
     void DrawDebug();
 
     void AddBall();
     void UpdateBall();
     void UpdatePaddle();
+    void UpdateParticles();
 
     list<Ball> balls;
     map<string, Paddle> paddles;
     map<string, int> scores;
     map<string, Rectangle> squares;
     Collisions collisions;
+    Particle particles[MAX_PARTICLES];
 };
 
 extern Game game;

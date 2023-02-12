@@ -130,11 +130,16 @@ class VectorMath {
         return sqrtf(vector.x * vector.x + vector.y * vector.y);
     }
 
-    float constrainAngle(float x){
+    float ConstrainAngle(float x){
         x = fmod(x,360);
         if (x < 0)
             x += 360;
         return x;
+    }
+
+    float GetRandomValue(float min, float max)
+    {
+        return min + static_cast<float>(rand()) / RAND_MAX * (max - min);
     }
 
     // Range
