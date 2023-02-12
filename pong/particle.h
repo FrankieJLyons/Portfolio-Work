@@ -1,40 +1,67 @@
-#include <cstdlib>
-#include <ctime>
+#include <vector>
+#include <memory>
 
 #include <raylib.h>
 
 #include "vectorMath.h"
 
-#define MAX_PARTICLES 100
+const int maxParticles = 64;
+const float particleLifetime = 0.64f;
+const float particleSpeed = 64.0f;
+const float particleSpread = 12.8;
+const float spawnDiameter = 16.0f;
 
-class Particle
-{
+class ParticleSpawner {
 private:
     VectorMath & vm = VectorMath::getInstance();
 
+    int spawnCount = 0;
+
 public:
     Vector2 position;
-    Vector2 velocity;
     Color color;
 
-    Particle()
-    {
-        position = (Vector2){ vm.GetRandomValue(0, 800), vm.GetRandomValue(0, 450) };
-        velocity = (Vector2){ vm.GetRandomValue(-100, 100) / 100.0f, vm.GetRandomValue(-100, 100) / 100.0f };
-        color = (Color){ (unsigned char)(GetRandomValue(0, 255) * 255.0f), 
-                 (unsigned char)(GetRandomValue(0, 255) * 255.0f), 
-                 (unsigned char)(GetRandomValue(0, 255) * 255.0f), 
-                 255 };
+    ParticleSpawner(Vector2 initialPos, Color initialColor) : position(initialPos), color(initialColor) {}
+    ~ParticleSpawner() {}
+
+    void Update(float deltaTime) {
+        for (int i = 0; i < particles.size(); i++) {
+            Particle& p = particles[i];
+            p.life -= deltaTime;
+
+            if (p.life > 0) {
+                p.position.x += cosf(p.angle) * particleSpeed * deltaTime;
+                p.position.y += sinf(p.angle) * particleSpeed * deltaTime;
+            } else {
+                particles.erase(particles.begin() + i);
+                i--;
+            }
+        }
+
+        if (spawnCount < maxParticles) {
+            Vector2 particlePos = {
+                position.x + cosf(GetRandomValue(-particleSpread, particleSpread)) * spawnDiameter,
+                position.y + sinf(GetRandomValue(-particleSpread, particleSpread)) * spawnDiameter
+            };
+            float angle = atan2(particlePos.y - position.y, particlePos.x - position.x);
+            Particle newParticle = { particlePos, color, angle, particleLifetime };
+            particles.push_back(newParticle);
+            spawnCount++;
+        }
     }
 
-    void Update()
-    {
-        position.x += velocity.x;
-        position.y += velocity.y;
+    void Draw() {
+        for (Particle& p : particles) {
+            DrawCircleV(p.position, 1, p.color);
+        }
     }
 
-    void Draw()
-    {
-        DrawPixel((int)position.x, (int)position.y, color);
-    }
+    struct Particle {
+        Vector2 position;
+        Color color;
+        float angle;
+        float life;
+    };
+
+    std::vector<Particle> particles;
 };

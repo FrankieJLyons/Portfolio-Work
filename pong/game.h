@@ -30,6 +30,8 @@ private:
     float addBallInterval = 4.0f; // time in seconds
     float timeSinceLastBall = 0.0f;
 
+    float previousFrameTime = GetTime();
+
     bool debuging = true;
     bool paused = false;
 
@@ -40,21 +42,21 @@ private:
     void DrawPaddles();
     void DrawScores();
     void DrawSquares();
-    void DrawParticles();
     void DrawPaused();
     void DrawDebug();
 
     void AddBall();
     void UpdateBall();
     void UpdatePaddle();
-    void UpdateParticles();
+
+    void Particles();
 
     list<Ball> balls;
     map<string, Paddle> paddles;
     map<string, int> scores;
     map<string, Rectangle> squares;
     Collisions collisions;
-    Particle particles[MAX_PARTICLES];
+    vector<unique_ptr<ParticleSpawner>> spawners;
 };
 
 extern Game game;

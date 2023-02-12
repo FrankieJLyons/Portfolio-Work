@@ -38,7 +38,6 @@ void Game::Draw()
     DrawBalls();
     DrawPaddles();
     DrawScores();
-    DrawParticles();
     DrawPaused();
     DrawDebug();
 }
@@ -49,7 +48,7 @@ void Game::Update()
         AddBall();
         UpdateBall();
         UpdatePaddle();
-        UpdateParticles();
+        Particles();
     }
 }
 
@@ -87,14 +86,6 @@ void Game::DrawSquares() {
     DrawRectangleRec(squares["BOTTOM_LEFT"], WHITE);
     DrawRectangleRec(squares["TOP_RIGHT"], WHITE);
     DrawRectangleRec(squares["BOTTOM_RIGHT"], WHITE);
-}
-
-void Game::DrawParticles()
-{
-    for (int i = 0; i < MAX_PARTICLES; i++)
-    {
-        particles[i].Draw();
-    }
 }
 
 void Game::DrawPaused() {
@@ -156,16 +147,22 @@ void Game::UpdateBall() {
 
         // Check if call has left the playground
         if(collisions.BallBorder(&ball)){
+            Color color = WHITE;
             if (ball.position.y < 0) {
                 scores["TOP"]--;
+                color = GREEN;
             } else if (ball.position.y > SCREEN_H){
                 scores["BOTTOM"]--;
+                color = GOLD;
             } else if (ball.position.x < PLAYGROUND_X) {
                 scores["LEFT"]--;
+                color = RED;
             } else if (ball.position.x > PLAYGROUND_W){
                 scores["RIGHT"]--;
+                color = BLUE;
             }
             toRemove.push_back(ball);
+            spawners.push_back(std::unique_ptr<ParticleSpawner>(new ParticleSpawner(ball.position, color)));       
         }
     }
 
@@ -190,10 +187,18 @@ void Game::UpdatePaddle() {
     // rightPaddle.Input();
 }
 
-void Game::UpdateParticles()
+void Game::Particles()
 {
-    for (int i = 0; i < MAX_PARTICLES; i++)
-    {
-        particles[i].Update();
+    float currentFrameTime = GetTime();
+    float deltaTime = currentFrameTime - previousFrameTime;
+    previousFrameTime = currentFrameTime;
+
+    for (int i = 0; i < spawners.size(); i++) {
+        spawners[i]->Update(deltaTime);
+        spawners[i]->Draw();
+        if (spawners[i]->particles.empty()) {
+            spawners.erase(spawners.begin() + i);
+            i--;
+        }
     }
 }
