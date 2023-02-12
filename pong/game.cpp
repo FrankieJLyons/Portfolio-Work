@@ -21,6 +21,11 @@ Game::Game() {
     squares["TOP_RIGHT"] = Rectangle { (float) PLAYGROUND_W - SQUARE, 0, SQUARE, SQUARE };
     squares["BOTTOM_RIGHT"] = Rectangle { (float) PLAYGROUND_W - SQUARE, SCREEN_H - SQUARE, SQUARE, SQUARE};
 
+    squareColors["TOP_LEFT"] = WHITE;
+    squareColors["BOTTOM_LEFT"] = WHITE;
+    squareColors["TOP_RIGHT"] = WHITE;
+    squareColors["BOTTOM_RIGHT"] = WHITE;
+
 }
 
 void Game::Setup()
@@ -38,6 +43,7 @@ void Game::Draw()
     DrawBalls();
     DrawPaddles();
     DrawScores();
+    DrawGoal();
     DrawPaused();
     DrawDebug();
 }
@@ -48,7 +54,6 @@ void Game::Update()
         AddBall();
         UpdateBall();
         UpdatePaddle();
-        Particles();
     }
 }
 
@@ -82,10 +87,32 @@ void Game::DrawScores() {
 }
 
 void Game::DrawSquares() {
-    DrawRectangleRec(squares["TOP_LEFT"], WHITE);
-    DrawRectangleRec(squares["BOTTOM_LEFT"], WHITE);
-    DrawRectangleRec(squares["TOP_RIGHT"], WHITE);
-    DrawRectangleRec(squares["BOTTOM_RIGHT"], WHITE);
+    DrawRectangleRec(squares["TOP_LEFT"], squareColors["TOP_LEFT"]);
+    DrawRectangleRec(squares["BOTTOM_LEFT"], squareColors["BOTTOM_LEFT"]);
+    DrawRectangleRec(squares["TOP_RIGHT"], squareColors["TOP_RIGHT"]);
+    DrawRectangleRec(squares["BOTTOM_RIGHT"], squareColors["BOTTOM_RIGHT"]);
+}
+
+void Game::DrawGoal() {
+    if(squareColorUpdate["GREEN"]) {
+        Goal(&squareColors["TOP_RIGHT"], "GREEN");
+    }
+    if(squareColorUpdate["GOLD"]) {
+        Goal(&squareColors["BOTTOM_LEFT"], "GOLD");
+    }
+    if(squareColorUpdate["RED"]) {
+        Goal(&squareColors["TOP_LEFT"], "RED");
+    }
+    if(squareColorUpdate["BLUE"]) {
+        Goal(&squareColors["BOTTOM_RIGHT"], "BLUE");
+    }
+
+    if(squareColorUpdate["GREEN"] 
+        || squareColorUpdate["GOLD"] 
+        || squareColorUpdate["RED"] 
+        || squareColorUpdate["BLUE"]){
+        Particles();
+    }
 }
 
 void Game::DrawPaused() {
@@ -112,6 +139,38 @@ void Game::DrawDebug() {
             DrawLine(ball.position.x, ball.position.y,  paddles["LEFT"].center.x,  paddles["LEFT"].center.y, RED);
             DrawLine(ball.position.x, ball.position.y, paddles["RIGHT"].center.x, paddles["RIGHT"].center.y, BLUE);
         }
+    }
+}
+
+
+void Game::Particles()
+{
+    float currentFrameTime = GetTime();
+    float deltaTime = currentFrameTime - previousFrameTime;
+    previousFrameTime = currentFrameTime;
+
+    for (int i = 0; i < spawners.size(); i++) {
+        spawners[i]->Update(deltaTime);
+        spawners[i]->Draw();
+        if (spawners[i]->particles.empty()) {
+            spawners.erase(spawners.begin() + i);
+            i--;
+        }
+    }
+}
+
+void Game::Goal(Color * goalColor, string name)
+{
+    if (goalColor->r == WHITE.r 
+        && goalColor->g == WHITE.g 
+        && goalColor->b == WHITE.b
+        && goalColor->a == WHITE.a) {
+        squareColorUpdate[name] = false;
+    } else {
+        float factor = GetFrameTime() * 8;
+        goalColor->r += (WHITE.r - goalColor->r) * factor;
+        goalColor->g += (WHITE.g - goalColor->g) * factor;
+        goalColor->b += (WHITE.b - goalColor->b) * factor;
     }
 }
 
@@ -151,15 +210,23 @@ void Game::UpdateBall() {
             if (ball.position.y < 0) {
                 scores["TOP"]--;
                 color = GREEN;
+                squareColors["TOP_RIGHT"] = color;
+                squareColorUpdate["GREEN"] = true;
             } else if (ball.position.y > SCREEN_H){
                 scores["BOTTOM"]--;
                 color = GOLD;
+                squareColors["BOTTOM_LEFT"] = color;
+                squareColorUpdate["GOLD"] = true;
             } else if (ball.position.x < PLAYGROUND_X) {
                 scores["LEFT"]--;
                 color = RED;
+                squareColors["TOP_LEFT"] = color;
+                squareColorUpdate["RED"] = true;
             } else if (ball.position.x > PLAYGROUND_W){
                 scores["RIGHT"]--;
                 color = BLUE;
+                squareColors["BOTTOM_RIGHT"] = color;
+                squareColorUpdate["BLUE"] = true;
             }
             toRemove.push_back(ball);
             spawners.push_back(std::unique_ptr<ParticleSpawner>(new ParticleSpawner(ball.position, color)));       
@@ -185,20 +252,4 @@ void Game::UpdatePaddle() {
     
     // // Player Movement
     // rightPaddle.Input();
-}
-
-void Game::Particles()
-{
-    float currentFrameTime = GetTime();
-    float deltaTime = currentFrameTime - previousFrameTime;
-    previousFrameTime = currentFrameTime;
-
-    for (int i = 0; i < spawners.size(); i++) {
-        spawners[i]->Update(deltaTime);
-        spawners[i]->Draw();
-        if (spawners[i]->particles.empty()) {
-            spawners.erase(spawners.begin() + i);
-            i--;
-        }
-    }
 }

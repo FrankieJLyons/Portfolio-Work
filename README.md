@@ -14,11 +14,10 @@ alias com_pong="g++ main.cpp ball.cpp collisions.cpp game.cpp paddle.cpp -I/opt/
 
 Known Issues:
 
-- Very randomly, a ball may ignore a paddle?
+- Very randomly, a ball may ignore a paddle? (Caused by time factor, may need tweaking)
 
 To Add:
 
-- Add some graphics for scoring
 - add a win / lose state
 - If a paddle is out, make their goal a wall
 - Deflector mechanic?

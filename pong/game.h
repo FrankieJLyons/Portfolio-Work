@@ -42,23 +42,25 @@ private:
     void DrawPaddles();
     void DrawScores();
     void DrawSquares();
+    void DrawGoal();
     void DrawPaused();
     void DrawDebug();
 
+    void Particles();
+    void Goal(Color * goalColor, string name);
     void AddBall();
+
     void UpdateBall();
     void UpdatePaddle();
-
-    void Particles();
 
     list<Ball> balls;
     map<string, Paddle> paddles;
     map<string, int> scores;
     map<string, Rectangle> squares;
+    map<string, Color> squareColors;
+    map<string, bool> squareColorUpdate;
     Collisions collisions;
     vector<unique_ptr<ParticleSpawner>> spawners;
 };
-
-extern Game game;
 
 #endif
