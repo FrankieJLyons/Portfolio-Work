@@ -193,7 +193,7 @@ void Collisions::BallBall(Ball * ball, Ball * nearbyBall) {
         Vector2 mtd = vm.GetMinimumBallTranslation(ball->position, ball->radius, nearbyBall->position, nearbyBall->radius);
         ResolveBallBallCollision(ball, nearbyBall, mtd);
         BounceBallOffBall(ball, nearbyBall);
-        // PlaySound(soundBall);
+        PlaySound(soundBall);
     }
 }
 

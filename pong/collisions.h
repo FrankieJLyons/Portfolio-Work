@@ -35,9 +35,10 @@ private:
     VectorMath & vm = VectorMath::getInstance();
 
     // Load the .wav file
-    Sound soundPaddle = LoadSound("/Users/frankie/Developer/Portfolio-Work/pong/assets/Square.ogg");
-    Sound soundSquare = LoadSound("/Users/frankie/Developer/Portfolio-Work/pong/assets/Paddle.ogg");
-    Sound soundScore = LoadSound("/Users/frankie/Developer/Portfolio-Work/pong/assets/Score.ogg");
+    Sound soundPaddle = LoadSound("assets/Square.ogg");
+    Sound soundSquare = LoadSound("assets/Paddle.ogg");
+    Sound soundScore = LoadSound("assets/Score.ogg");
+    Sound soundBall = LoadSound("assets/Ball.ogg");
 };
 
 #endif
