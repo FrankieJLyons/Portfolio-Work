@@ -93,6 +93,16 @@ class VectorMath {
         return mtd;
     }
 
+    Vector2 GetMinimumBallTranslation(Vector2 pos1, float r1, Vector2 pos2, float r2) {
+        Vector2 mtd = {0, 0};
+        Vector2 distance = Subtract(pos2, pos1);
+        float d = Length(distance);
+        if (d < r1 + r2) {
+            mtd = Scale(Normalize(distance), (r1 + r2) - d);
+        }
+        return mtd;
+    }
+
     Vector2 GetMinimumTranslation(Vector2 position, float radius, Rectangle rect) {
         Vector2 mtd = {0, 0};
 

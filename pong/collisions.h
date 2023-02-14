@@ -23,10 +23,13 @@ public:
         SetSoundPitch(soundScore, 3.0f); 
     }
     void BounceBallOffRectangle(Ball * ball, Rectangle rect);
+    void BounceBallOffBall(Ball * ball, Ball * nearbyBall);
     void ResolveBallRectCollision(Ball * ball, Vector2 mtd);
+    void ResolveBallBallCollision(Ball* ball, Ball* nearbyBall, Vector2 mtd);
     void BallPaddle(Ball * ball, Paddle paddle);
     void BallRect(Ball * ball, Rectangle rect);
     bool BallBorder(Ball * ball);
+    void BallBall(Ball * ball, Ball * nearbyBall);
 
 private:
     VectorMath & vm = VectorMath::getInstance();

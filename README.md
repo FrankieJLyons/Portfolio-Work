@@ -10,7 +10,7 @@ alias com_ray="g++ main.cpp -I/opt/homebrew/Cellar/raylib/4.2.0/include -L/opt/h
 
 // Pong Compile command
 
-alias com_pong="g++ main.cpp ball.cpp collisions.cpp game.cpp paddle.cpp -I/opt/homebrew/Cellar/raylib/4.2.0/include -L/opt/homebrew/Cellar/raylib/4.2.0/lib -lraylib -std=c++11 -arch arm64 -o app && ./app"
+alias com_pong="g++ main.cpp ball.cpp collisions.cpp game.cpp paddle.cpp quadtree.cpp -I/opt/homebrew/Cellar/raylib/4.2.0/include -L/opt/homebrew/Cellar/raylib/4.2.0/lib -lraylib -std=c++11 -arch arm64 -o app && ./app"
 
 Known Issues:
 
@@ -18,6 +18,7 @@ Known Issues:
 
 To Add:
 
+- Ball to ball collision
 - add a win / lose state
 - If a paddle is out, make their goal a wall
 - Deflector mechanic?

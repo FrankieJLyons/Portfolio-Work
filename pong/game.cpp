@@ -25,7 +25,6 @@ Game::Game() {
     squareColors["BOTTOM_LEFT"] = WHITE;
     squareColors["TOP_RIGHT"] = WHITE;
     squareColors["BOTTOM_RIGHT"] = WHITE;
-
 }
 
 void Game::Setup()
@@ -229,13 +228,37 @@ void Game::UpdateBall() {
                 squareColorUpdate["BLUE"] = true;
             }
             toRemove.push_back(ball);
-            spawners.push_back(std::unique_ptr<ParticleSpawner>(new ParticleSpawner(ball.position, color)));       
+            spawners.push_back(std::unique_ptr<ParticleSpawner>(new ParticleSpawner(ball.position, color)));   
         }
     }
 
     for (Ball &ball : toRemove) {
         balls.remove(ball);
     }
+
+    // // Create or update the Quadtree with the current set of balls
+    // Quadtree quadtree = {0, {PLAYGROUND_X, 0, PLAYGROUND_W, SCREEN_H}};
+    // for (Ball &ball : balls) {
+    //     quadtree.Insert(&ball);
+
+    //     // Check ball-to-ball collisions by using the Quadtree
+    //     std::vector<Ball*> nearbyBalls;
+    //     quadtree.Query(nearbyBalls, ball.position.x - ball.radius, ball.position.y - ball.radius,
+    //                 ball.position.x + ball.radius, ball.position.y + ball.radius);
+    //     for (Ball* nearbyBall : nearbyBalls) {
+    //         if (&ball != nearbyBall) {
+    //             collisions.BallBall(&ball, nearbyBall);
+    //         }
+    //     }   
+    // }
+
+    for (Ball &ball : balls) {
+        for (Ball &ball2 : balls) {
+            if (&ball != &ball2) {
+                collisions.BallBall(&ball, &ball2);
+            }
+        } 
+    } 
 }
 
 void Game::UpdatePaddle() {

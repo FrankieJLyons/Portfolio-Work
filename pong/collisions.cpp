@@ -183,3 +183,39 @@ bool Collisions::BallBorder(Ball * ball) {
     }
     return false;
 }
+
+void Collisions::BallBall(Ball * ball, Ball * nearbyBall) {
+    if(CheckCollisionCircles(
+        ball->position, 
+        ball->radius, 
+        nearbyBall->position, 
+        nearbyBall->radius)) {   
+        Vector2 mtd = vm.GetMinimumBallTranslation(ball->position, ball->radius, nearbyBall->position, nearbyBall->radius);
+        ResolveBallBallCollision(ball, nearbyBall, mtd);
+        BounceBallOffBall(ball, nearbyBall);
+        // PlaySound(soundBall);
+    }
+}
+
+void Collisions::ResolveBallBallCollision(Ball* ball, Ball* nearbyBall, Vector2 mtd) {
+    float combinedRadius = ball->radius + nearbyBall->radius;
+    float overlap = combinedRadius - vm.Length(mtd);
+    if (overlap > 0) {
+        Vector2 normal = vm.Normalize(mtd);
+        Vector2 correction = vm.Scale(normal, overlap);
+        ball->position = vm.Add(ball->position, vm.Scale(correction, (-ball->mass / (ball->mass + nearbyBall->mass)) * 1.025));
+        nearbyBall->position = vm.Add(nearbyBall->position, vm.Scale(correction, (nearbyBall->mass / (ball->mass + nearbyBall->mass)) * 1.025));
+    }
+}
+
+void Collisions::BounceBallOffBall(Ball* ball, Ball* nearbyBall) {
+    Vector2 normal = vm.Subtract(nearbyBall->position, ball->position);
+    ball->velocity = vm.Scale(ball->direction, ball->speed);
+    nearbyBall->velocity = vm.Scale(nearbyBall->direction, nearbyBall->speed);
+    float dot1 = vm.DotProduct(ball->velocity, normal);
+    float dot2 = vm.DotProduct(nearbyBall->velocity, normal);
+    Vector2 reflection1 = vm.Subtract(ball->velocity, vm.Scale(normal, 2 * dot1));
+    Vector2 reflection2 = vm.Subtract(nearbyBall->velocity, vm.Scale(normal, 2 * dot2));
+    ball->direction = vm.Normalize(reflection1);
+    nearbyBall->direction = vm.Normalize(reflection2);
+}

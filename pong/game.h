@@ -16,6 +16,7 @@ using namespace std;
 #include "consts.h"
 #include "paddle.h"
 #include "particle.h"
+#include "quadtree.h"
 
 class Game
 {
@@ -27,7 +28,7 @@ public:
 
 private:
     // Set up timer to add new balls
-    float addBallInterval = 4.0f; // time in seconds
+    float addBallInterval = 2.0f; // time in seconds
     float timeSinceLastBall = 0.0f;
 
     float previousFrameTime = GetTime();

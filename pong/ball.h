@@ -19,6 +19,7 @@ public:
     
     const float initialSpeed = 300.0f;
     const float maxSpeed = initialSpeed * 2;
+    const float mass = 1.0f;
 
     Ball();
     void Print();
