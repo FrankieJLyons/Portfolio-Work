@@ -252,13 +252,26 @@ void Game::UpdateBall() {
     //     }   
     // }
 
-    for (Ball &ball : balls) {
-        for (Ball &ball2 : balls) {
-            if (&ball != &ball2) {
-                collisions.BallBall(&ball, &ball2);
+    std::set<std::pair<Ball*, Ball*>> comparedPairs;
+    std::set<std::pair<Ball*, Ball*>> collidedPairs;
+    auto it1 = balls.begin();
+    while (it1 != balls.end()) {
+        auto it2 = std::next(it1);
+        while (it2 != balls.end()) {
+            Ball& ball = *it1;
+            Ball& ball2 = *it2;
+            const auto pair = std::make_pair(&ball, &ball2);
+            if (comparedPairs.count(pair) == 0) {
+                if (collidedPairs.count(pair) == 0 && collidedPairs.count(std::make_pair(&ball2, &ball)) == 0) {
+                    collisions.BallBall(&ball, &ball2);
+                    collidedPairs.insert(pair);
+                }
+                comparedPairs.insert(pair);
             }
-        } 
-    } 
+            ++it2;
+        }
+        ++it1;
+    }
 }
 
 void Game::UpdatePaddle() {
