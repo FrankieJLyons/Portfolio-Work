@@ -25,6 +25,11 @@ Game::Game() {
     squareColors["BOTTOM_LEFT"] = WHITE;
     squareColors["TOP_RIGHT"] = WHITE;
     squareColors["BOTTOM_RIGHT"] = WHITE;
+
+    blockers["TOP"] = Rectangle { (float) PLAYGROUND_X, 0, PLAYGROUND_W, BLOCKER };
+    blockers["BOTTOM"] = Rectangle { (float) PLAYGROUND_X, SCREEN_H - BLOCKER, PLAYGROUND_W, BLOCKER };
+    blockers["LEFT"] = Rectangle { (float) PLAYGROUND_X, 0, BLOCKER, SCREEN_H };
+    blockers["RIGHT"] = Rectangle { (float) PLAYGROUND_W  - BLOCKER, 0, BLOCKER, SCREEN_H };
 }
 
 void Game::Setup()
@@ -38,6 +43,7 @@ void Game::Setup()
 void Game::Draw()
 {
     DrawPlayground();
+    DrawBlockers();
     DrawSquares();
     DrawBalls();
     DrawPaddles();
@@ -72,10 +78,10 @@ void Game::DrawBalls() {
 }
 
 void Game::DrawPaddles() {
-    paddles["TOP"].Draw();
-    paddles["BOTTOM"].Draw();
-    paddles["LEFT"].Draw();
-    paddles["RIGHT"].Draw();
+    if(scores["TOP"] > 0) paddles["TOP"].Draw();
+    if(scores["BOTTOM"] > 0) paddles["BOTTOM"].Draw();
+    if(scores["LEFT"] > 0) paddles["LEFT"].Draw();
+    if(scores["RIGHT"] > 0) paddles["RIGHT"].Draw();
 }
 
 void Game::DrawScores() {
@@ -90,6 +96,13 @@ void Game::DrawSquares() {
     DrawRectangleRec(squares["BOTTOM_LEFT"], squareColors["BOTTOM_LEFT"]);
     DrawRectangleRec(squares["TOP_RIGHT"], squareColors["TOP_RIGHT"]);
     DrawRectangleRec(squares["BOTTOM_RIGHT"], squareColors["BOTTOM_RIGHT"]);
+}
+
+void Game::DrawBlockers() {
+    if(scores["TOP"] <= 0) DrawRectangleRec(blockers["TOP"], WHITE);
+    if(scores["BOTTOM"] <= 0) DrawRectangleRec(blockers["BOTTOM"], WHITE);
+    if(scores["LEFT"] <= 0) DrawRectangleRec(blockers["LEFT"], WHITE);
+    if(scores["RIGHT"] <= 0) DrawRectangleRec(blockers["RIGHT"], WHITE);
 }
 
 void Game::DrawGoal() {
@@ -189,10 +202,22 @@ void Game::UpdateBall() {
         ball.Update();
         
         // Check paddle collision based on position
-        if(ball.position.y < HALF_H) collisions.BallPaddle(&ball, paddles["TOP"]);
-        else collisions.BallPaddle(&ball, paddles["BOTTOM"]);
-        if(ball.position.x < HALF_W) collisions.BallPaddle(&ball, paddles["LEFT"]);
-        else collisions.BallPaddle(&ball, paddles["RIGHT"]);
+        if(ball.position.y < HALF_H) {
+            if(scores["TOP"] > 0) collisions.BallPaddle(&ball, paddles["TOP"]);
+            if(scores["TOP"] <= 0) collisions.BallRect(&ball, blockers["TOP"]);
+        }
+        else {
+            if(scores["BOTTOM"] > 0) collisions.BallPaddle(&ball, paddles["BOTTOM"]);
+            if(scores["BOTTOM"] <= 0) collisions.BallRect(&ball, blockers["BOTTOM"]);
+        }
+        if(ball.position.x < HALF_W) {
+            if(scores["LEFT"] > 0) collisions.BallPaddle(&ball, paddles["LEFT"]);
+            if(scores["LEFT"] <= 0) collisions.BallRect(&ball, blockers["LEFT"]);
+        }
+        else {
+            if(scores["RIGHT"] > 0) collisions.BallPaddle(&ball, paddles["RIGHT"]);
+            if(scores["RIGHT"] <= 0) collisions.BallRect(&ball, blockers["RIGHT"]);
+        }
 
         // Check square collision based on position
         if(ball.position.x < HALF_W) {
@@ -206,7 +231,7 @@ void Game::UpdateBall() {
         // Check if call has left the playground
         if(collisions.BallBorder(&ball)){
             Color color = WHITE;
-            if (ball.position.y < 0) {
+            if (ball.position.y <= 0) {
                 scores["TOP"]--;
                 color = GREEN;
                 squareColors["TOP_RIGHT"] = color;
@@ -275,17 +300,26 @@ void Game::UpdateBall() {
 }
 
 void Game::UpdatePaddle() {
-    paddles["TOP"].Update();
-    paddles["BOTTOM"].Update();
-    paddles["LEFT"].Update();
-    paddles["RIGHT"].Update();
+    if(scores["TOP"] > 0) {
+        paddles["TOP"].Update();
+        paddles["TOP"].Auto(balls, squares["TOP_LEFT"], squares["TOP_RIGHT"]);
+    }
 
-    // AI Movement
-    paddles["TOP"].Auto(balls, squares["TOP_LEFT"], squares["TOP_RIGHT"]);
-    paddles["BOTTOM"].Auto(balls, squares["BOTTOM_LEFT"], squares["BOTTOM_RIGHT"]);
-    paddles["LEFT"].Auto(balls, squares["TOP_LEFT"], squares["BOTTOM_LEFT"]);
-    paddles["RIGHT"].Auto(balls, squares["TOP_RIGHT"], squares["BOTTOM_RIGHT"]);
-    
+    if(scores["BOTTOM"] > 0) {
+        paddles["BOTTOM"].Update();
+        paddles["BOTTOM"].Auto(balls, squares["BOTTOM_LEFT"], squares["BOTTOM_RIGHT"]);
+    }
+
+    if(scores["LEFT"] > 0) {
+        paddles["LEFT"].Update();
+        paddles["LEFT"].Auto(balls, squares["TOP_LEFT"], squares["BOTTOM_LEFT"]);
+    }
+
+    if(scores["RIGHT"] > 0) {
+        paddles["RIGHT"].Update();
+        paddles["RIGHT"].Auto(balls, squares["TOP_RIGHT"], squares["BOTTOM_RIGHT"]);
+    }
+
     // // Player Movement
     // rightPaddle.Input();
 }

@@ -18,7 +18,9 @@ Known Issues:
 
 To Add:
 
-- Ball to ball collision
 - add a win / lose state
-- If a paddle is out, make their goal a wall
 - Deflector mechanic?
+- Magnet mechananic?
+- Reflector mechanic?
+- Quick spawner mechanic?
+- Wind mechanic?

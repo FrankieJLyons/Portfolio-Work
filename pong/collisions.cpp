@@ -150,7 +150,7 @@ void Collisions::BallPaddle(Ball * ball, Paddle paddle) {
     if(CheckCollisionCircleRec(
         ball->position, 
         ball->radius, 
-        rect) && elapsedTime > 0.01) {
+        rect) && elapsedTime > 0.025) {
         lastCollisionTime = currentTime;
         Vector2 next = {paddle.position.x + paddle.velocity.x * GetFrameTime(), paddle.position.y + paddle.velocity.y * GetFrameTime()};
         Vector2 mtd = vm.GetMinimumMovingTranslation(ball->position, ball->radius, rect, next);

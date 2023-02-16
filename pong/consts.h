@@ -25,5 +25,6 @@ const int TEXT_POS = TEXT_OFFSET * 3;
 const int LONG_SIDE = 96;
 const int SHORT_SIDE = 12;
 const float SQUARE = 64.0f;
+const float BLOCKER = 16.0f;
 
 #endif

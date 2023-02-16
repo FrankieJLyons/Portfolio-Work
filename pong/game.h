@@ -44,6 +44,7 @@ private:
     void DrawPaddles();
     void DrawScores();
     void DrawSquares();
+    void DrawBlockers();
     void DrawGoal();
     void DrawPaused();
     void DrawDebug();
@@ -63,6 +64,7 @@ private:
     map<string, bool> squareColorUpdate;
     Collisions collisions;
     vector<unique_ptr<ParticleSpawner>> spawners;
+    map<string, Rectangle> blockers;
 };
 
 #endif
