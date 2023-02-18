@@ -6,6 +6,7 @@
 #include <map>
 #include <cmath>
 #include <set>
+#include <sstream>
 #include <stdlib.h>
 #include <time.h>
 using namespace std;
@@ -14,10 +15,12 @@ using namespace std;
 
 #include "ball.h"
 #include "collisions.h"
-#include "consts.h"
 #include "paddle.h"
-#include "particle.h"
 #include "quadtree.h"
+
+#include "consts.h"
+#include "event.h"
+#include "particle.h"
 
 class Game
 {
@@ -36,8 +39,14 @@ private:
 
     bool debuging = true;
     bool paused = false;
+    bool gameOver = false;
 
-    Sound soundPause = LoadSound("/Users/frankie/Developer/Portfolio-Work/pong/assets/Pause.ogg");
+    string winner = "Nobody";
+    Color winningColor = WHITE;
+
+    Sound soundPause = LoadSound("assets/Pause.ogg");
+    Sound soundOut = LoadSound("assets/Out.ogg");
+    Sound soundWin = LoadSound("assets/Win.ogg");
 
     void DrawPlayground();
     void DrawBalls();
@@ -56,6 +65,9 @@ private:
     void UpdateBall();
     void UpdatePaddle();
 
+    void GameOver();
+    void DrawWinScreen();
+
     list<Ball> balls;
     map<string, Paddle> paddles;
     map<string, int> scores;
@@ -65,6 +77,7 @@ private:
     Collisions collisions;
     vector<unique_ptr<ParticleSpawner>> spawners;
     map<string, Rectangle> blockers;
+    Event<bool> events;
 };
 
 #endif

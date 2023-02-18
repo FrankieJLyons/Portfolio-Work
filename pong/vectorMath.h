@@ -162,7 +162,7 @@ class VectorMath {
         return roundf(num * 10.0f) / 10.0f;
     }
 
-    private:
+private:
     VectorMath() {}
     VectorMath(VectorMath const&) = delete;
     void operator=(VectorMath const&) = delete;

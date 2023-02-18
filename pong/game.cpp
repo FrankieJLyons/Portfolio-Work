@@ -11,10 +11,10 @@ Game::Game() {
     paddles["LEFT"] = Paddle { {(float) PLAYGROUND_X, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, RED};
     paddles["RIGHT"] = Paddle { {(float) PLAYGROUND_W - SHORT_SIDE, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, BLUE };
 
-    scores["TOP"] = 10;
-    scores["BOTTOM"] = 10;
-    scores["LEFT"] = 10;
-    scores["RIGHT"] = 10;
+    scores["TOP"] = 1;
+    scores["BOTTOM"] = 1;
+    scores["LEFT"] = 1;
+    scores["RIGHT"] = 1;
 
     squares["TOP_LEFT"] = Rectangle { (float) PLAYGROUND_X, 0, SQUARE, SQUARE };
     squares["BOTTOM_LEFT"] = Rectangle { (float) PLAYGROUND_X, SCREEN_H - SQUARE, SQUARE, SQUARE };
@@ -30,18 +30,27 @@ Game::Game() {
     blockers["BOTTOM"] = Rectangle { (float) PLAYGROUND_X, SCREEN_H - BLOCKER, PLAYGROUND_W, BLOCKER };
     blockers["LEFT"] = Rectangle { (float) PLAYGROUND_X, 0, BLOCKER, SCREEN_H };
     blockers["RIGHT"] = Rectangle { (float) PLAYGROUND_W  - BLOCKER, 0, BLOCKER, SCREEN_H };
+
+    events.AddListener([this](bool isNegativeScore) {
+        if (isNegativeScore) {
+            PlaySound(soundOut);
+
+            // Called on last notify (so -1)
+            if(events.GetCount() >= 2) {
+                GameOver();
+            }
+        }
+    });
 }
 
-void Game::Setup()
-{
+void Game::Setup() {
     // Initialize raylib
     InitWindow(SCREEN_W, SCREEN_H, "Pong");
     SetWindowState(FLAG_VSYNC_HINT);
     SetTargetFPS(TARGET_FPS);
 }
 
-void Game::Draw()
-{
+void Game::Draw() {
     DrawPlayground();
     DrawBlockers();
     DrawSquares();
@@ -51,12 +60,14 @@ void Game::Draw()
     DrawGoal();
     DrawPaused();
     DrawDebug();
+    if (gameOver) {
+        DrawWinScreen();
+    }
 }
 
-void Game::Update()
-{
+void Game::Update() {
     if(!paused){ 
-        AddBall();
+        if(!gameOver) AddBall();
         UpdateBall();
         UpdatePaddle();
     }
@@ -236,24 +247,31 @@ void Game::UpdateBall() {
                 color = GREEN;
                 squareColors["TOP_RIGHT"] = color;
                 squareColorUpdate["GREEN"] = true;
+                events.Notify((scores["TOP"] <= 0));
             } else if (ball.position.y > SCREEN_H){
                 scores["BOTTOM"]--;
                 color = GOLD;
                 squareColors["BOTTOM_LEFT"] = color;
                 squareColorUpdate["GOLD"] = true;
+                events.Notify((scores["BOTTOM"] <= 0));
             } else if (ball.position.x < PLAYGROUND_X) {
                 scores["LEFT"]--;
                 color = RED;
                 squareColors["TOP_LEFT"] = color;
                 squareColorUpdate["RED"] = true;
+                events.Notify((scores["LEFT"] <= 0));
             } else if (ball.position.x > PLAYGROUND_W){
                 scores["RIGHT"]--;
                 color = BLUE;
                 squareColors["BOTTOM_RIGHT"] = color;
                 squareColorUpdate["BLUE"] = true;
+                events.Notify((scores["RIGHT"] <= 0));
             }
             toRemove.push_back(ball);
             spawners.push_back(std::unique_ptr<ParticleSpawner>(new ParticleSpawner(ball.position, color)));   
+        } else if (gameOver) {
+            toRemove.push_back(ball);
+            spawners.push_back(std::unique_ptr<ParticleSpawner>(new ParticleSpawner(ball.position, winningColor)));  
         }
     }
 
@@ -322,4 +340,35 @@ void Game::UpdatePaddle() {
 
     // // Player Movement
     // rightPaddle.Input();
+}
+
+
+// Win State
+void Game::GameOver() {
+    PlaySound(soundWin);
+    gameOver = true;
+
+    if(scores["TOP"] > 0) {
+        winner = "GREEN";
+        winningColor = GREEN;
+    }
+    else if(scores["BOTTOM"] > 0) {
+        winner = "YELLOW";
+        winningColor = YELLOW;
+    }
+    else if(scores["LEFT"] > 0) {
+        winner = "RED";
+        winningColor = RED;
+    }
+    else if(scores["RIGHT"] > 0) {
+        winner = "BLUE";
+        winningColor = BLUE;
+    }
+}
+
+void Game::DrawWinScreen() {
+    std::stringstream winnerText;
+    winnerText << winner << " WINS!";
+    DrawRectangle(0, 0, SCREEN_W, SCREEN_H, Fade(BLACK, 0.5f));
+    DrawText(winnerText.str().c_str(), HALF_W - MeasureText("COLOR WINS", 40)/2, HALF_H - 20, 40, winningColor);
 }

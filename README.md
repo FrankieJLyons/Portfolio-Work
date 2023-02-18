@@ -15,10 +15,11 @@ alias com_pong="g++ main.cpp ball.cpp collisions.cpp game.cpp paddle.cpp quadtre
 Known Issues:
 
 - Very randomly, a ball may ignore a paddle? (Caused by time factor, may need tweaking)
+- Balls may bounce off each other and go same direction
+- Score can go below zero
 
 To Add:
 
-- add a win / lose state
 - Deflector mechanic?
 - Magnet mechananic?
 - Reflector mechanic?
