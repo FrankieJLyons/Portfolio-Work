@@ -136,22 +136,21 @@ void Collisions::BounceBallOffRectangle(Ball * ball, Rectangle rect) {
 }
 
 void Collisions::ResolveBallRectCollision (Ball * ball, Vector2 mtd) {
-    ball->direction = vm.Add(ball->direction, vm.Scale(vm.GetRandomDirection(), 0.05f));
-    if(ball->speed <= ball->maxSpeed) ball->speed *= 1.05f;
+    ball->direction = vm.Add(ball->direction, vm.Scale(vm.GetRandomDirection(), RANDOM_DIRECTION_BUFFER));
+    if(ball->speed <= ball->maxSpeed) ball->speed *= BALL_SPEED_UP_FACTOR;
     ball->velocity = vm.Scale(ball->direction, ball->speed);
-    ball->position = vm.Add(ball->position, vm.Scale(mtd, 1.025f));
+    ball->position = vm.Add(ball->position, vm.Scale(mtd, MTD_BUFFER));
 }
 
 void Collisions::BallPaddle(Ball * ball, Paddle paddle) {
-    static double lastCollisionTime = 0.0;
     double currentTime = GetTime();
-    double elapsedTime = currentTime - lastCollisionTime;
+    double elapsedTime = currentTime - ball->lastCollisionTime;
     Rectangle rect = paddle.bounds;
     if(CheckCollisionCircleRec(
         ball->position, 
         ball->radius, 
-        rect) && elapsedTime > 0.025) {
-        lastCollisionTime = currentTime;
+        rect) && elapsedTime > ELAPSED_TIME_BUFFER) {
+        ball->lastCollisionTime = currentTime;
         Vector2 next = {paddle.position.x + paddle.velocity.x * GetFrameTime(), paddle.position.y + paddle.velocity.y * GetFrameTime()};
         Vector2 mtd = vm.GetMinimumMovingTranslation(ball->position, ball->radius, rect, next);
         BounceBallOffRectangle(ball, rect);
@@ -186,17 +185,18 @@ bool Collisions::BallBorder(Ball * ball) {
 
 // BALL ON BALL //
 void Collisions::BallBall(Ball * ball, Ball * nearbyBall) {
+    double currentTime = GetTime();
+    double elapsedTime = currentTime - ball->lastCollisionTime;
     if(CheckCollisionCircles(
         ball->position, 
         ball->radius, 
         nearbyBall->position, 
-        nearbyBall->radius)) {   
+        nearbyBall->radius) && elapsedTime > ELAPSED_TIME_BUFFER) {   
         Vector2 mtd = vm.GetMinimumBallTranslation(ball->position, ball->radius, nearbyBall->position, nearbyBall->radius);
         ResolveBallBallCollision(ball, nearbyBall, mtd);
         BounceBallOffBall(ball, nearbyBall);
         PlaySound(soundBall);
-        if(ball->speed > nearbyBall->speed) nearbyBall->speed = ball->speed;
-        else ball->speed = nearbyBall->speed;
+        ball->speed = nearbyBall->speed = ((ball->speed + nearbyBall->speed) / 2) * BALL_SLOW_DOWN_FACTOR;
     }
 }
 
@@ -206,8 +206,8 @@ void Collisions::ResolveBallBallCollision(Ball* ball, Ball* nearbyBall, Vector2 
     if (overlap > 0) {
         Vector2 normal = vm.Normalize(mtd);
         Vector2 correction = vm.Scale(normal, overlap);
-        ball->position = vm.Add(ball->position, vm.Scale(correction, (-ball->mass / (ball->mass + nearbyBall->mass)) * 1.05));
-        nearbyBall->position = vm.Add(nearbyBall->position, vm.Scale(correction, (nearbyBall->mass / (ball->mass + nearbyBall->mass)) * 1.05));
+        ball->position = vm.Add(ball->position, vm.Scale(correction, (-ball->mass / (ball->mass + nearbyBall->mass)) * MTD_BUFFER));
+        nearbyBall->position = vm.Add(nearbyBall->position, vm.Scale(correction, (nearbyBall->mass / (ball->mass + nearbyBall->mass)) * MTD_BUFFER));
     }
 }
 
@@ -222,8 +222,8 @@ void Collisions::BounceBallOffBall(Ball* ball, Ball* nearbyBall) {
     ball->direction = vm.Normalize(reflection1);
     nearbyBall->direction = vm.Normalize(reflection2);
 
-    if(vm.isWithinRange(ball->direction.x, nearbyBall->direction.x, 0.05f) 
-    && vm.isWithinRange(ball->direction.y, nearbyBall->direction.y, 0.05f)) {
+    if(vm.isWithinRange(ball->direction.x, nearbyBall->direction.x, RANDOM_DIRECTION_BUFFER) 
+    && vm.isWithinRange(ball->direction.y, nearbyBall->direction.y, RANDOM_DIRECTION_BUFFER)) {
         nearbyBall->direction.x = -nearbyBall->direction.x;
         nearbyBall->direction.y = -nearbyBall->direction.y;
     }

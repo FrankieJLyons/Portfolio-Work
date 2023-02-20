@@ -21,6 +21,8 @@ public:
     const float maxSpeed = initialSpeed * 2;
     const float mass = 1.0f;
 
+    double lastCollisionTime;
+
     Ball();
     void Print();
     void Draw();

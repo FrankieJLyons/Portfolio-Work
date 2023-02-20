@@ -11,6 +11,7 @@ Ball::Ball(): id(nextId++) {
     direction = vm.GetRandomDirection();
     speed = initialSpeed;
     velocity = vm.Scale(direction, speed);
+    lastCollisionTime = 0.0;
 }
 
 void Ball::Print() {

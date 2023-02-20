@@ -39,6 +39,13 @@ private:
     Sound soundSquare = LoadSound("assets/Paddle.ogg");
     Sound soundScore = LoadSound("assets/Score.ogg");
     Sound soundBall = LoadSound("assets/Ball.ogg");
+
+    const float RANDOM_DIRECTION_BUFFER = 0.05f;
+    const float MTD_BUFFER = 1.05f;
+    const float ELAPSED_TIME_BUFFER = 0.0125f;
+
+    const float BALL_SPEED_UP_FACTOR = 1.05f;
+    const float BALL_SLOW_DOWN_FACTOR = 0.95f;
 };
 
 #endif
