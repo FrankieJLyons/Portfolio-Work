@@ -20,6 +20,8 @@ Known Issues:
 
 To Add:
 
+- Restart mechanic / next level mechanic
+- Menu
 - Deflector mechanic?
 - Magnet mechananic?
 - Reflector mechanic?

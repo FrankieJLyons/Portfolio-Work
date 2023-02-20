@@ -173,17 +173,18 @@ void Collisions::BallRect(Ball * ball, Rectangle rect) {
 }
 
 bool Collisions::BallBorder(Ball * ball) {
-    int buffer = ball->radius * 4.0f;
+    int buffer = ball->radius * 3.0f;
     if(!CheckCollisionCircleRec(
     ball->position, 
     buffer, 
-    Rectangle {PLAYGROUND_X, 0, SCREEN_H, SCREEN_H})) {  
+    Rectangle {PLAYGROUND_X_START, 0, SCREEN_H, SCREEN_H})) {  
         PlaySound(soundScore);
         return true;
     }
     return false;
 }
 
+// BALL ON BALL //
 void Collisions::BallBall(Ball * ball, Ball * nearbyBall) {
     if(CheckCollisionCircles(
         ball->position, 
@@ -194,6 +195,8 @@ void Collisions::BallBall(Ball * ball, Ball * nearbyBall) {
         ResolveBallBallCollision(ball, nearbyBall, mtd);
         BounceBallOffBall(ball, nearbyBall);
         PlaySound(soundBall);
+        if(ball->speed > nearbyBall->speed) nearbyBall->speed = ball->speed;
+        else ball->speed = nearbyBall->speed;
     }
 }
 
@@ -203,8 +206,8 @@ void Collisions::ResolveBallBallCollision(Ball* ball, Ball* nearbyBall, Vector2 
     if (overlap > 0) {
         Vector2 normal = vm.Normalize(mtd);
         Vector2 correction = vm.Scale(normal, overlap);
-        ball->position = vm.Add(ball->position, vm.Scale(correction, (-ball->mass / (ball->mass + nearbyBall->mass)) * 1.025));
-        nearbyBall->position = vm.Add(nearbyBall->position, vm.Scale(correction, (nearbyBall->mass / (ball->mass + nearbyBall->mass)) * 1.025));
+        ball->position = vm.Add(ball->position, vm.Scale(correction, (-ball->mass / (ball->mass + nearbyBall->mass)) * 1.05));
+        nearbyBall->position = vm.Add(nearbyBall->position, vm.Scale(correction, (nearbyBall->mass / (ball->mass + nearbyBall->mass)) * 1.05));
     }
 }
 
@@ -218,4 +221,10 @@ void Collisions::BounceBallOffBall(Ball* ball, Ball* nearbyBall) {
     Vector2 reflection2 = vm.Subtract(nearbyBall->velocity, vm.Scale(normal, 2 * dot2));
     ball->direction = vm.Normalize(reflection1);
     nearbyBall->direction = vm.Normalize(reflection2);
+
+    if(vm.isWithinRange(ball->direction.x, nearbyBall->direction.x, 0.05f) 
+    && vm.isWithinRange(ball->direction.y, nearbyBall->direction.y, 0.05f)) {
+        nearbyBall->direction.x = -nearbyBall->direction.x;
+        nearbyBall->direction.y = -nearbyBall->direction.y;
+    }
 }

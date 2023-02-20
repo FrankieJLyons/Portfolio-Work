@@ -37,7 +37,7 @@ private:
 
     float previousFrameTime = GetTime();
 
-    bool debuging = true;
+    bool debuging = false;
     bool paused = false;
     bool gameOver = false;
 

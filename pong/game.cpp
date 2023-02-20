@@ -8,35 +8,36 @@ Game::Game() {
 
     paddles["TOP"] = Paddle { {(float) HALF_W - LONG_SIDE / 2, 0 }, LONG_SIDE, SHORT_SIDE, GREEN };
     paddles["BOTTOM"] = Paddle { {(float) HALF_W - LONG_SIDE / 2, (float) SCREEN_H - SHORT_SIDE}, LONG_SIDE, SHORT_SIDE, GOLD };
-    paddles["LEFT"] = Paddle { {(float) PLAYGROUND_X, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, RED};
-    paddles["RIGHT"] = Paddle { {(float) PLAYGROUND_W - SHORT_SIDE, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, BLUE };
+    paddles["LEFT"] = Paddle { {(float) PLAYGROUND_X_START, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, RED};
+    paddles["RIGHT"] = Paddle { {(float) PLAYGROUND_X_END - SHORT_SIDE, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, BLUE };
 
     scores["TOP"] = 1;
     scores["BOTTOM"] = 1;
-    scores["LEFT"] = 1;
-    scores["RIGHT"] = 1;
+    scores["LEFT"] = 30;
+    scores["RIGHT"] = 30;
 
-    squares["TOP_LEFT"] = Rectangle { (float) PLAYGROUND_X, 0, SQUARE, SQUARE };
-    squares["BOTTOM_LEFT"] = Rectangle { (float) PLAYGROUND_X, SCREEN_H - SQUARE, SQUARE, SQUARE };
-    squares["TOP_RIGHT"] = Rectangle { (float) PLAYGROUND_W - SQUARE, 0, SQUARE, SQUARE };
-    squares["BOTTOM_RIGHT"] = Rectangle { (float) PLAYGROUND_W - SQUARE, SCREEN_H - SQUARE, SQUARE, SQUARE};
+    squares["TOP_LEFT"] = Rectangle { (float) PLAYGROUND_X_START, 0, SQUARE, SQUARE };
+    squares["BOTTOM_LEFT"] = Rectangle { (float) PLAYGROUND_X_START, SCREEN_H - SQUARE, SQUARE, SQUARE };
+    squares["TOP_RIGHT"] = Rectangle { (float) PLAYGROUND_X_END - SQUARE, 0, SQUARE, SQUARE };
+    squares["BOTTOM_RIGHT"] = Rectangle { (float) PLAYGROUND_X_END - SQUARE, SCREEN_H - SQUARE, SQUARE, SQUARE};
 
     squareColors["TOP_LEFT"] = WHITE;
     squareColors["BOTTOM_LEFT"] = WHITE;
     squareColors["TOP_RIGHT"] = WHITE;
     squareColors["BOTTOM_RIGHT"] = WHITE;
 
-    blockers["TOP"] = Rectangle { (float) PLAYGROUND_X, 0, PLAYGROUND_W, BLOCKER };
-    blockers["BOTTOM"] = Rectangle { (float) PLAYGROUND_X, SCREEN_H - BLOCKER, PLAYGROUND_W, BLOCKER };
-    blockers["LEFT"] = Rectangle { (float) PLAYGROUND_X, 0, BLOCKER, SCREEN_H };
-    blockers["RIGHT"] = Rectangle { (float) PLAYGROUND_W  - BLOCKER, 0, BLOCKER, SCREEN_H };
+    blockers["TOP"] = Rectangle { (float) PLAYGROUND_X_START, 0, SCREEN_H, BLOCKER };
+    blockers["BOTTOM"] = Rectangle { (float) PLAYGROUND_X_START, SCREEN_H - BLOCKER, SCREEN_H, BLOCKER };
+    blockers["LEFT"] = Rectangle { (float) PLAYGROUND_X_START, 0, BLOCKER, SCREEN_H };
+    blockers["RIGHT"] = Rectangle { (float) PLAYGROUND_X_END  - BLOCKER, 0, BLOCKER, SCREEN_H };
 
     events.AddListener([this](bool isNegativeScore) {
+        static int count = 0;
         if (isNegativeScore) {
             PlaySound(soundOut);
-
+            ++count;
             // Called on last notify (so -1)
-            if(events.GetCount() >= 2) {
+            if(count >= 3) {
                 GameOver();
             }
         }
@@ -77,9 +78,9 @@ void Game::Update() {
 // Private //
 /////////////
 void Game::DrawPlayground() {
-    DrawRectangleLines(PLAYGROUND_X, 0, SCREEN_H, SCREEN_H, WHITE); // Border
+    DrawRectangleLines(PLAYGROUND_X_START, 0, SCREEN_H, SCREEN_H, WHITE); // Border
     DrawLine(HALF_W, 0, HALF_W, SCREEN_H, WHITE); // Vert divider
-    DrawLine(PLAYGROUND_X, HALF_H, PLAYGROUND_W, HALF_H, WHITE); // Hor divider
+    DrawLine(PLAYGROUND_X_START, HALF_H, PLAYGROUND_X_END, HALF_H, WHITE); // Hor divider
 }
 
 void Game::DrawBalls() {
@@ -96,10 +97,10 @@ void Game::DrawPaddles() {
 }
 
 void Game::DrawScores() {
-    DrawText(TextFormat("%i", scores["TOP"]), PLAYGROUND_W - TEXT_POS, TEXT_OFFSET, FONT_SIZE, GREEN);
-    DrawText(TextFormat("%i", scores["BOTTOM"]), PLAYGROUND_X + TEXT_OFFSET, SCREEN_H - TEXT_POS, FONT_SIZE, GOLD);
-    DrawText(TextFormat("%i", scores["LEFT"]), PLAYGROUND_X + TEXT_OFFSET, TEXT_OFFSET, FONT_SIZE, RED);
-    DrawText(TextFormat("%i", scores["RIGHT"]), PLAYGROUND_W - TEXT_POS, SCREEN_H - TEXT_POS, FONT_SIZE, BLUE);
+    DrawText(TextFormat("%i", scores["TOP"]), PLAYGROUND_X_END - TEXT_POS, TEXT_OFFSET, FONT_SIZE, GREEN);
+    DrawText(TextFormat("%i", scores["BOTTOM"]), PLAYGROUND_X_START + TEXT_OFFSET, SCREEN_H - TEXT_POS, FONT_SIZE, GOLD);
+    DrawText(TextFormat("%i", scores["LEFT"]), PLAYGROUND_X_START + TEXT_OFFSET, TEXT_OFFSET, FONT_SIZE, RED);
+    DrawText(TextFormat("%i", scores["RIGHT"]), PLAYGROUND_X_END - TEXT_POS, SCREEN_H - TEXT_POS, FONT_SIZE, BLUE);
 }
 
 void Game::DrawSquares() {
@@ -254,13 +255,13 @@ void Game::UpdateBall() {
                 squareColors["BOTTOM_LEFT"] = color;
                 squareColorUpdate["GOLD"] = true;
                 events.Notify((scores["BOTTOM"] <= 0));
-            } else if (ball.position.x < PLAYGROUND_X) {
+            } else if (ball.position.x < PLAYGROUND_X_START) {
                 scores["LEFT"]--;
                 color = RED;
                 squareColors["TOP_LEFT"] = color;
                 squareColorUpdate["RED"] = true;
                 events.Notify((scores["LEFT"] <= 0));
-            } else if (ball.position.x > PLAYGROUND_W){
+            } else if (ball.position.x > PLAYGROUND_X_END){
                 scores["RIGHT"]--;
                 color = BLUE;
                 squareColors["BOTTOM_RIGHT"] = color;
@@ -280,7 +281,7 @@ void Game::UpdateBall() {
     }
 
     // // Create or update the Quadtree with the current set of balls
-    // Quadtree quadtree = {0, {PLAYGROUND_X, 0, PLAYGROUND_W, SCREEN_H}};
+    // Quadtree quadtree = {0, {PLAYGROUND_X_START, 0, PLAYGROUND_X_END, SCREEN_H}};
     // for (Ball &ball : balls) {
     //     quadtree.Insert(&ball);
 
