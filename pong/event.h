@@ -9,6 +9,10 @@ public:
         listeners.push_back(listener);
     }
 
+    void ClearListeners() {
+        listeners.clear();
+    }
+
     void Notify(Args... args) {
         for (auto listener : listeners){
             listener(args...);

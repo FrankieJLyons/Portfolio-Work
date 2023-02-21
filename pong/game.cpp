@@ -11,20 +11,14 @@ Game::Game() {
     paddles["LEFT"] = Paddle { {(float) PLAYGROUND_X_START, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, RED};
     paddles["RIGHT"] = Paddle { {(float) PLAYGROUND_X_END - SHORT_SIDE, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, BLUE };
 
-    scores["TOP"] = 1;
-    scores["BOTTOM"] = 1;
-    scores["LEFT"] = 30;
-    scores["RIGHT"] = 30;
+    scores["TOP"] = scores["BOTTOM"] = scores["LEFT"] = scores["RIGHT"] = INIT_SCORE;
 
     squares["TOP_LEFT"] = Rectangle { (float) PLAYGROUND_X_START, 0, SQUARE, SQUARE };
     squares["BOTTOM_LEFT"] = Rectangle { (float) PLAYGROUND_X_START, SCREEN_H - SQUARE, SQUARE, SQUARE };
     squares["TOP_RIGHT"] = Rectangle { (float) PLAYGROUND_X_END - SQUARE, 0, SQUARE, SQUARE };
     squares["BOTTOM_RIGHT"] = Rectangle { (float) PLAYGROUND_X_END - SQUARE, SCREEN_H - SQUARE, SQUARE, SQUARE};
 
-    squareColors["TOP_LEFT"] = WHITE;
-    squareColors["BOTTOM_LEFT"] = WHITE;
-    squareColors["TOP_RIGHT"] = WHITE;
-    squareColors["BOTTOM_RIGHT"] = WHITE;
+    squareColors["TOP_LEFT"] = squareColors["BOTTOM_LEFT"] = squareColors["TOP_RIGHT"] = squareColors["BOTTOM_RIGHT"] = WHITE;
 
     blockers["TOP"] = Rectangle { (float) PLAYGROUND_X_START, 0, SCREEN_H, BLOCKER };
     blockers["BOTTOM"] = Rectangle { (float) PLAYGROUND_X_START, SCREEN_H - BLOCKER, SCREEN_H, BLOCKER };
@@ -42,6 +36,19 @@ Game::Game() {
             }
         }
     });
+}
+
+Game::~Game() {
+    balls.clear();
+    paddles.clear();
+    scores.clear();
+    squares.clear();
+    squareColors.clear();
+    squareColorUpdate.clear();
+    // collisions.clear();
+    spawners.clear();
+    blockers.clear();
+    // events.clear();
 }
 
 void Game::Setup() {
@@ -72,6 +79,21 @@ void Game::Update() {
         UpdateBall();
         UpdatePaddle();
     }
+}
+
+void Game::Reset() {
+    squareColorUpdate.clear();
+    spawners.clear();
+
+    events.ClearListeners();
+
+    paddles["TOP"].position = {(float) HALF_W - LONG_SIDE / 2, 0 };
+    paddles["BOTTOM"].position = {(float) HALF_W - LONG_SIDE / 2, (float) SCREEN_H - SHORT_SIDE};
+    paddles["LEFT"].position =  {(float) PLAYGROUND_X_START, (float) HALF_H - LONG_SIDE / 2};
+    paddles["RIGHT"].position =  {(float) PLAYGROUND_X_END - SHORT_SIDE, (float) HALF_H - LONG_SIDE / 2};
+
+    scores["TOP"] = scores["BOTTOM"] = scores["LEFT"] = scores["RIGHT"] = INIT_SCORE;
+    squareColors["TOP_LEFT"] = squareColors["BOTTOM_LEFT"] = squareColors["TOP_RIGHT"] = squareColors["BOTTOM_RIGHT"] = WHITE;
 }
 
 /////////////
@@ -174,9 +196,9 @@ void Game::Particles()
     previousFrameTime = currentFrameTime;
 
     for (int i = 0; i < spawners.size(); i++) {
-        spawners[i]->Update(deltaTime);
-        spawners[i]->Draw();
-        if (spawners[i]->particles.empty()) {
+        spawners[i].Update(deltaTime);
+        spawners[i].Draw();
+        if (spawners[i].particles.empty()) {
             spawners.erase(spawners.begin() + i);
             i--;
         }
@@ -269,10 +291,10 @@ void Game::UpdateBall() {
                 events.Notify((scores["RIGHT"] <= 0));
             }
             toRemove.push_back(ball);
-            spawners.push_back(std::unique_ptr<ParticleSpawner>(new ParticleSpawner(ball.position, color)));   
+            spawners.push_back( ParticleSpawner {ball.position, color });   
         } else if (gameOver) {
             toRemove.push_back(ball);
-            spawners.push_back(std::unique_ptr<ParticleSpawner>(new ParticleSpawner(ball.position, winningColor)));  
+            spawners.push_back( ParticleSpawner {ball.position, winningColor });    
         }
     }
 

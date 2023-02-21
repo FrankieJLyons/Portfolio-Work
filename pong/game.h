@@ -26,9 +26,11 @@ class Game
 {
 public:
     Game();
+    ~Game();
     void Setup();
     void Draw();
     void Update();
+    void Reset();
 
 private:
     // Set up timer to add new balls
@@ -75,9 +77,11 @@ private:
     map<string, Color> squareColors;
     map<string, bool> squareColorUpdate;
     Collisions collisions;
-    vector<unique_ptr<ParticleSpawner>> spawners;
+    vector<ParticleSpawner> spawners;
     map<string, Rectangle> blockers;
     Event<bool> events;
+
+    const int INIT_SCORE = 1;
 };
 
 #endif

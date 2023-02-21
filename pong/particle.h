@@ -8,12 +8,12 @@
 const int maxParticles = 64;
 const float particleLifetime = 0.64f;
 const float particleSpeed = 64.0f;
-const float particleSpread = 12.8;
+const float particleSpread = 12.8f;
 const float spawnDiameter = 16.0f;
 
 class ParticleSpawner {
 private:
-    VectorMath & vm = VectorMath::getInstance();
+    VectorMath* vm;
 
     int spawnCount = 0;
 
@@ -21,8 +21,33 @@ public:
     Vector2 position;
     Color color;
 
-    ParticleSpawner(Vector2 initialPos, Color initialColor) : position(initialPos), color(initialColor) {}
-    ~ParticleSpawner() {}
+    struct Particle {
+        Vector2 position;
+        Color color;
+        float angle;
+        float life;
+    };
+
+    std::vector<Particle> particles;
+
+    ParticleSpawner(Vector2 initialPos, Color initialColor) : position(initialPos), color(initialColor) {
+        vm = &VectorMath::getInstance();
+    }
+
+    ~ParticleSpawner() {
+        particles.clear();
+    }
+
+    ParticleSpawner(const ParticleSpawner& other) : vm(other.vm), position(other.position), color (other.color) {}
+
+    ParticleSpawner& operator=(const ParticleSpawner& other) {
+        if (this != &other) {
+            vm = other.vm;
+            position = other.position;
+            color = other.color;
+        }
+        return *this;
+    }
 
     void Update(float deltaTime) {
         for (int i = 0; i < particles.size(); i++) {
@@ -55,13 +80,4 @@ public:
             DrawCircleV(p.position, 1, p.color);
         }
     }
-
-    struct Particle {
-        Vector2 position;
-        Color color;
-        float angle;
-        float life;
-    };
-
-    std::vector<Particle> particles;
 };
