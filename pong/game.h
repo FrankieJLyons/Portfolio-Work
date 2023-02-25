@@ -34,17 +34,19 @@ public:
 
 private:
     // Set up timer to add new balls
-    float addBallInterval = 2.0f; // time in seconds
-    float timeSinceLastBall = 0.0f;
+    float addBallInterval; // time in seconds
+    float timeSinceLastBall;
 
-    float previousFrameTime = GetTime();
+    float previousFrameTime;
 
-    bool debuging = false;
-    bool paused = false;
-    bool gameOver = false;
+    bool debuging;
+    bool paused;
+    bool gameOver;
 
-    string winner = "Nobody";
-    Color winningColor = WHITE;
+    string winner;
+    Color winningColor;
+
+    int eventCount;
 
     Sound soundPause = LoadSound("assets/Pause.ogg");
     Sound soundOut = LoadSound("assets/Out.ogg");
@@ -69,6 +71,8 @@ private:
 
     void GameOver();
     void DrawWinScreen();
+
+    void ResetGame();
 
     list<Ball> balls;
     map<string, Paddle> paddles;

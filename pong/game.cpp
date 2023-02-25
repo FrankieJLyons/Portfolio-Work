@@ -4,38 +4,7 @@
 // Public //
 ////////////
 Game::Game() {
-    balls.push_back(Ball());
-
-    paddles["TOP"] = Paddle { {(float) HALF_W - LONG_SIDE / 2, 0 }, LONG_SIDE, SHORT_SIDE, GREEN };
-    paddles["BOTTOM"] = Paddle { {(float) HALF_W - LONG_SIDE / 2, (float) SCREEN_H - SHORT_SIDE}, LONG_SIDE, SHORT_SIDE, GOLD };
-    paddles["LEFT"] = Paddle { {(float) PLAYGROUND_X_START, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, RED};
-    paddles["RIGHT"] = Paddle { {(float) PLAYGROUND_X_END - SHORT_SIDE, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, BLUE };
-
-    scores["TOP"] = scores["BOTTOM"] = scores["LEFT"] = scores["RIGHT"] = INIT_SCORE;
-
-    squares["TOP_LEFT"] = Rectangle { (float) PLAYGROUND_X_START, 0, SQUARE, SQUARE };
-    squares["BOTTOM_LEFT"] = Rectangle { (float) PLAYGROUND_X_START, SCREEN_H - SQUARE, SQUARE, SQUARE };
-    squares["TOP_RIGHT"] = Rectangle { (float) PLAYGROUND_X_END - SQUARE, 0, SQUARE, SQUARE };
-    squares["BOTTOM_RIGHT"] = Rectangle { (float) PLAYGROUND_X_END - SQUARE, SCREEN_H - SQUARE, SQUARE, SQUARE};
-
-    squareColors["TOP_LEFT"] = squareColors["BOTTOM_LEFT"] = squareColors["TOP_RIGHT"] = squareColors["BOTTOM_RIGHT"] = WHITE;
-
-    blockers["TOP"] = Rectangle { (float) PLAYGROUND_X_START, 0, SCREEN_H, BLOCKER };
-    blockers["BOTTOM"] = Rectangle { (float) PLAYGROUND_X_START, SCREEN_H - BLOCKER, SCREEN_H, BLOCKER };
-    blockers["LEFT"] = Rectangle { (float) PLAYGROUND_X_START, 0, BLOCKER, SCREEN_H };
-    blockers["RIGHT"] = Rectangle { (float) PLAYGROUND_X_END  - BLOCKER, 0, BLOCKER, SCREEN_H };
-
-    events.AddListener([this](bool isNegativeScore) {
-        static int count = 0;
-        if (isNegativeScore) {
-            PlaySound(soundOut);
-            ++count;
-            // Called on last notify (so -1)
-            if(count >= 3) {
-                GameOver();
-            }
-        }
-    });
+    ResetGame();
 }
 
 Game::~Game() {
@@ -266,25 +235,25 @@ void Game::UpdateBall() {
         if(collisions.BallBorder(&ball)){
             Color color = WHITE;
             if (ball.position.y <= 0) {
-                scores["TOP"]--;
+                if (scores["TOP"] > 0) scores["TOP"]--;
                 color = GREEN;
                 squareColors["TOP_RIGHT"] = color;
                 squareColorUpdate["GREEN"] = true;
                 events.Notify((scores["TOP"] <= 0));
             } else if (ball.position.y > SCREEN_H){
-                scores["BOTTOM"]--;
+                if (scores["BOTTOM"] > 0) scores["BOTTOM"]--;
                 color = GOLD;
                 squareColors["BOTTOM_LEFT"] = color;
                 squareColorUpdate["GOLD"] = true;
                 events.Notify((scores["BOTTOM"] <= 0));
             } else if (ball.position.x < PLAYGROUND_X_START) {
-                scores["LEFT"]--;
+                if (scores["LEFT"] > 0) scores["LEFT"]--;
                 color = RED;
                 squareColors["TOP_LEFT"] = color;
                 squareColorUpdate["RED"] = true;
                 events.Notify((scores["LEFT"] <= 0));
             } else if (ball.position.x > PLAYGROUND_X_END){
-                scores["RIGHT"]--;
+                if (scores["RIGHT"] > 0) scores["RIGHT"]--;
                 color = BLUE;
                 squareColors["BOTTOM_RIGHT"] = color;
                 squareColorUpdate["BLUE"] = true;
@@ -393,5 +362,61 @@ void Game::DrawWinScreen() {
     std::stringstream winnerText;
     winnerText << winner << " WINS!";
     DrawRectangle(0, 0, SCREEN_W, SCREEN_H, Fade(BLACK, 0.5f));
-    DrawText(winnerText.str().c_str(), HALF_W - MeasureText("COLOR WINS", 40)/2, HALF_H - 20, 40, winningColor);
+    DrawText(winnerText.str().c_str(), HALF_W - MeasureText(winnerText.str().c_str(), 40)/2, HALF_H - 20, 40, winningColor);
+
+
+    DrawText("Press SPACE to play again", HALF_W - MeasureText("Press SPACE to play again", 20) / 2, HALF_H + 64, 20, winningColor);
+
+    if(IsKeyPressed(KEY_SPACE)) { 
+        ResetGame();
+    }
+}
+
+void Game::ResetGame() {
+    addBallInterval = 2.0f;
+    timeSinceLastBall = 0.0f;
+
+    previousFrameTime = GetTime();
+
+    debuging = false;
+    paused = false;
+    gameOver = false;
+
+    winner = "Nobody";
+    winningColor = WHITE;
+
+    balls.push_back(Ball());
+
+    paddles["TOP"] = Paddle { {(float) HALF_W - LONG_SIDE / 2, 0 }, LONG_SIDE, SHORT_SIDE, GREEN };
+    paddles["BOTTOM"] = Paddle { {(float) HALF_W - LONG_SIDE / 2, (float) SCREEN_H - SHORT_SIDE}, LONG_SIDE, SHORT_SIDE, GOLD };
+    paddles["LEFT"] = Paddle { {(float) PLAYGROUND_X_START, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, RED};
+    paddles["RIGHT"] = Paddle { {(float) PLAYGROUND_X_END - SHORT_SIDE, (float) HALF_H - LONG_SIDE / 2}, SHORT_SIDE, LONG_SIDE, BLUE };
+
+    scores["TOP"] = scores["BOTTOM"] = scores["LEFT"] = scores["RIGHT"] = INIT_SCORE;
+
+    squares["TOP_LEFT"] = Rectangle { (float) PLAYGROUND_X_START, 0, SQUARE, SQUARE };
+    squares["BOTTOM_LEFT"] = Rectangle { (float) PLAYGROUND_X_START, SCREEN_H - SQUARE, SQUARE, SQUARE };
+    squares["TOP_RIGHT"] = Rectangle { (float) PLAYGROUND_X_END - SQUARE, 0, SQUARE, SQUARE };
+    squares["BOTTOM_RIGHT"] = Rectangle { (float) PLAYGROUND_X_END - SQUARE, SCREEN_H - SQUARE, SQUARE, SQUARE};
+
+    squareColors["TOP_LEFT"] = squareColors["BOTTOM_LEFT"] = squareColors["TOP_RIGHT"] = squareColors["BOTTOM_RIGHT"] = WHITE;
+
+    blockers["TOP"] = Rectangle { (float) PLAYGROUND_X_START, 0, SCREEN_H, BLOCKER };
+    blockers["BOTTOM"] = Rectangle { (float) PLAYGROUND_X_START, SCREEN_H - BLOCKER, SCREEN_H, BLOCKER };
+    blockers["LEFT"] = Rectangle { (float) PLAYGROUND_X_START, 0, BLOCKER, SCREEN_H };
+    blockers["RIGHT"] = Rectangle { (float) PLAYGROUND_X_END  - BLOCKER, 0, BLOCKER, SCREEN_H };
+
+    events.ClearListeners();
+
+    eventCount = 0;
+    events.AddListener([this](bool isNegativeScore) {
+        if (isNegativeScore) {
+            PlaySound(soundOut);
+            ++eventCount;
+            // Called on last notify (so -1)
+            if(eventCount >= 3) {
+                GameOver();
+            }
+        }
+    });
 }
