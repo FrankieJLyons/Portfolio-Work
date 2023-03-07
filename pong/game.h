@@ -31,7 +31,7 @@ public:
     void Draw();
     void Update();
     void ProcessInput();
-    void Reset();
+    void ResetGame();
 
 private:
     // Set up timer to add new balls
@@ -72,8 +72,6 @@ private:
 
     void GameOver();
     void DrawWinScreen();
-
-    void ResetGame();
 
     list<Ball> balls;
     map<string, Paddle> paddles;

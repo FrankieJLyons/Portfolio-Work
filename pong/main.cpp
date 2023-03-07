@@ -4,7 +4,7 @@ using namespace std;
 
 #include <raylib.h>
 
-#include "game.h"
+#include "screenmanager.h"
 
 int main()
 {
@@ -13,8 +13,7 @@ int main()
 
     InitAudioDevice();
 
-    Game game = Game();
-    game.Setup();
+    ScreenManager sm = ScreenManager();
 
     // Main game loop
     while (!WindowShouldClose())
@@ -22,9 +21,9 @@ int main()
         BeginDrawing();
         ClearBackground(BLACK);
 
-        game.Update();
-        game.Draw();
-        game.ProcessInput();
+        sm.Update();
+        sm.Draw();
+        sm.ProcessInput();
 
         EndDrawing();
     }

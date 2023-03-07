@@ -27,4 +27,6 @@ const int SHORT_SIDE = 12;
 const float SQUARE = 64.0f;
 const float BLOCKER = 16.0f;
 
+enum Screen { ScMenu, ScGame };
+
 #endif
