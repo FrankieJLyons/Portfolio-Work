@@ -22,6 +22,13 @@ public:
         SetSoundPitch(soundSquare, 3.0f); 
         SetSoundPitch(soundScore, 3.0f); 
     }
+    ~Collisions() {
+        UnloadSound(soundPaddle);
+        UnloadSound(soundSquare);
+        UnloadSound(soundScore);
+        UnloadSound(soundBall);
+    }
+
     void BounceBallOffRectangle(Ball * ball, Rectangle rect);
     void BounceBallOffBall(Ball * ball, Ball * nearbyBall);
     void ResolveBallRectCollision(Ball * ball, Vector2 mtd);

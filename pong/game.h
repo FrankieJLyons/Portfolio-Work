@@ -30,6 +30,7 @@ public:
     void Setup();
     void Draw();
     void Update();
+    void ProcessInput();
     void Reset();
 
 private:

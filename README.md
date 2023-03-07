@@ -16,7 +16,6 @@ Known Issues:
 
 - Very randomly, a ball may ignore a paddle? (Caused by time factor, may need tweaking)
 - Balls may bounce off each other and go same direction
-- Move any key inputs out of draw method
 
 To Add:
 

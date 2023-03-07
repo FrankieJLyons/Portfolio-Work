@@ -24,6 +24,7 @@ int main()
 
         game.Update();
         game.Draw();
+        game.ProcessInput();
 
         EndDrawing();
     }

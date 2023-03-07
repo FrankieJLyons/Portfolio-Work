@@ -5,6 +5,11 @@
 template<typename... Args>
 class Event {
 public:
+    Event() {}
+    ~Event() {
+        ClearListeners();
+    }
+
     void AddListener(std::function<void(Args...)> listener) {
         listeners.push_back(listener);
     }

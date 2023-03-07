@@ -8,16 +8,31 @@ Game::Game() {
 }
 
 Game::~Game() {
-    balls.clear();
+    UnloadSound(soundPause);
+    UnloadSound(soundOut);
+    UnloadSound(soundWin);
+
+    events.ClearListeners();
+
     paddles.clear();
     scores.clear();
     squares.clear();
     squareColors.clear();
     squareColorUpdate.clear();
     // collisions.clear();
-    spawners.clear();
     blockers.clear();
-    // events.clear();
+
+    // Delete dynamically allocated objects
+    // while (!spawners.empty()) {
+    //     delete spawners.at(spawners.size() - 1);
+    //     spawners.pop_back();
+    // }
+    // spawners.clear();
+
+    for (auto ball : balls) {
+        delete &ball;
+    }
+    balls.clear();
 }
 
 void Game::Setup() {
@@ -50,19 +65,17 @@ void Game::Update() {
     }
 }
 
-void Game::Reset() {
-    squareColorUpdate.clear();
-    spawners.clear();
+void Game::ProcessInput() {
+    if(IsKeyPressed(KEY_P)) { 
+        paused = !paused; 
+        PlaySound(soundPause);
+    }
+    
+    if(IsKeyPressed(KEY_F)) debuging = !debuging;
 
-    events.ClearListeners();
-
-    paddles["TOP"].position = {(float) HALF_W - LONG_SIDE / 2, 0 };
-    paddles["BOTTOM"].position = {(float) HALF_W - LONG_SIDE / 2, (float) SCREEN_H - SHORT_SIDE};
-    paddles["LEFT"].position =  {(float) PLAYGROUND_X_START, (float) HALF_H - LONG_SIDE / 2};
-    paddles["RIGHT"].position =  {(float) PLAYGROUND_X_END - SHORT_SIDE, (float) HALF_H - LONG_SIDE / 2};
-
-    scores["TOP"] = scores["BOTTOM"] = scores["LEFT"] = scores["RIGHT"] = INIT_SCORE;
-    squareColors["TOP_LEFT"] = squareColors["BOTTOM_LEFT"] = squareColors["TOP_RIGHT"] = squareColors["BOTTOM_RIGHT"] = WHITE;
+    if (gameOver && IsKeyPressed(KEY_SPACE)) { 
+        ResetGame();
+    }
 }
 
 /////////////
@@ -131,10 +144,6 @@ void Game::DrawGoal() {
 }
 
 void Game::DrawPaused() {
-    if(IsKeyPressed(KEY_P)) { 
-        paused = !paused; 
-        PlaySound(soundPause);
-    }
     if(paused) {
         DrawRectangle(0, 0, SCREEN_W, SCREEN_H, Fade(BLACK, 0.5f));
         DrawText("PAUSED", HALF_W - MeasureText("PAUSED", 40)/2, HALF_H - 20, 40, WHITE);
@@ -142,7 +151,6 @@ void Game::DrawPaused() {
 }
 
 void Game::DrawDebug() {
-    if(IsKeyPressed(KEY_F)) debuging = !debuging;
     if(debuging) {
         DrawFPS(4, 4);
         DrawText(TextFormat("X: %i", (int) balls.front().position.x), 8, 32, 16, WHITE);
@@ -366,10 +374,6 @@ void Game::DrawWinScreen() {
 
 
     DrawText("Press SPACE to play again", HALF_W - MeasureText("Press SPACE to play again", 20) / 2, HALF_H + 64, 20, winningColor);
-
-    if(IsKeyPressed(KEY_SPACE)) { 
-        ResetGame();
-    }
 }
 
 void Game::ResetGame() {
@@ -413,7 +417,7 @@ void Game::ResetGame() {
         if (isNegativeScore) {
             PlaySound(soundOut);
             ++eventCount;
-            // Called on last notify (so -1)
+            
             if(eventCount >= 3) {
                 GameOver();
             }

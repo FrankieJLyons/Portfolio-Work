@@ -24,6 +24,7 @@ public:
     double lastCollisionTime;
 
     Ball();
+    ~Ball(){}
     void Print();
     void Draw();
     void Update();

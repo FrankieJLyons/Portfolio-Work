@@ -31,6 +31,7 @@ public:
 
     Paddle();
     Paddle(Vector2 position, int w, int h, Color color);
+    ~Paddle(){}
     void Print();
     void Draw();
     void Update();
