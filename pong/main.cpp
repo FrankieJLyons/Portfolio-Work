@@ -8,6 +8,11 @@ using namespace std;
 
 int main()
 {
+    // Initialize raylib
+    InitWindow(SCREEN_W, SCREEN_H, "Pong");
+    SetWindowState(FLAG_VSYNC_HINT);
+    SetTargetFPS(TARGET_FPS);
+
     // Initialize random seed
     srand((unsigned int)time(NULL));
 

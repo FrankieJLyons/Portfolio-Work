@@ -27,7 +27,6 @@ class Game
 public:
     Game();
     ~Game();
-    void Setup();
     void Draw();
     void Update();
     void ProcessInput();

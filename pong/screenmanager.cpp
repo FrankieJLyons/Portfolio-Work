@@ -2,7 +2,6 @@
 
 ScreenManager::ScreenManager() {
     current = Screen::ScMenu;
-    game->Setup();
 }
 
 void ScreenManager::Draw() {

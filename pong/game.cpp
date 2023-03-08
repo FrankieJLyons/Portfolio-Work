@@ -35,13 +35,6 @@ Game::~Game() {
     balls.clear();
 }
 
-void Game::Setup() {
-    // Initialize raylib
-    InitWindow(SCREEN_W, SCREEN_H, "Pong");
-    SetWindowState(FLAG_VSYNC_HINT);
-    SetTargetFPS(TARGET_FPS);
-}
-
 void Game::Draw() {
     DrawPlayground();
     DrawBlockers();
